@@ -63,21 +63,21 @@
             pointer-events: auto;
         }
 
-        /* Virtuelle Buttons - Höher und Transparenter */
+        /* Virtuelle Buttons - Höher und Transparenter für freies Sichtfeld */
         .controls-container {
             position: absolute; 
-            bottom: 45px; /* Höher gesetzt für besseres Sichtfeld unten */
-            width: 100%; padding: 0 50px;
+            bottom: 60px; /* Deutlich höher für Sichtbarkeit der Boden-Hindernisse */
+            width: 100%; padding: 0 60px;
             display: flex; justify-content: space-between;
             align-items: flex-end;
             z-index: 150; pointer-events: none;
         }
 
         .ctrl-btn {
-            background: rgba(255, 255, 255, 0.03); /* Massive Transparenz */
-            border: 1px solid rgba(56, 189, 248, 0.15); /* Dezenter Rahmen */
-            backdrop-filter: blur(2px);
-            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.02); /* Fast unsichtbar */
+            border: 1px solid rgba(56, 189, 248, 0.1); 
+            backdrop-filter: blur(1px);
+            border-radius: 20px;
             display: flex; align-items: center; justify-content: center;
             pointer-events: auto;
             -webkit-tap-highlight-color: transparent;
@@ -85,20 +85,21 @@
         }
 
         .ctrl-btn:active {
-            background: rgba(56, 189, 248, 0.25); /* Sichtbares Feedback nur beim Drücken */
-            transform: scale(0.92);
+            background: rgba(56, 189, 248, 0.2); 
+            transform: scale(0.9);
         }
 
-        .btn-arrow { width: 85px; height: 85px; font-size: 2.2rem; color: rgba(56, 189, 248, 0.3); }
+        .btn-arrow { width: 90px; height: 90px; font-size: 2.5rem; color: rgba(56, 189, 248, 0.2); }
         .btn-jump { 
-            width: 115px; height: 115px; border-radius: 50%; 
-            border-width: 2px; border-color: rgba(56, 189, 248, 0.2); 
+            width: 120px; height: 120px; border-radius: 50%; 
+            border-width: 2px; border-color: rgba(56, 189, 248, 0.15); 
         }
 
         .btn-label {
             font-family: 'Orbitron', sans-serif;
-            font-size: 10px; text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.2);
+            font-size: 11px; text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.1);
+            letter-spacing: 2px;
         }
 
         .btn-menu {
@@ -110,18 +111,18 @@
         }
 
         .hud-box {
-            background: rgba(30, 41, 59, 0.4);
+            background: rgba(30, 41, 59, 0.3);
             padding: 8px 16px; border-radius: 12px;
             border: 1px solid rgba(56, 189, 248, 0.1);
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(2px);
         }
 
         #fs-toggle {
             position: fixed; top: 15px; right: 20px;
             z-index: 200; width: 45px; height: 45px;
-            background: rgba(30, 41, 59, 0.4);
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            border-radius: 8px; color: rgba(255,255,255,0.4);
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid rgba(56, 189, 248, 0.1);
+            border-radius: 8px; color: rgba(255,255,255,0.2);
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
         }
@@ -130,12 +131,12 @@
 <body>
 
     <div id="orientation-msg">
-        <div class="text-sky-500 text-6xl mb-4">↻</div>
+        <div class="text-sky-500 text-6xl mb-4 animate-pulse">↻</div>
         <h2 class="font-game text-xl uppercase italic">Bitte drehen</h2>
         <p class="text-slate-400 mt-2 max-w-xs">Logan’s Geometrie Crash wird im Querformat gespielt.</p>
     </div>
 
-    <!-- Fullscreen Button -->
+    <!-- Fullscreen Toggle -->
     <button id="fs-toggle" title="Vollbild" onclick="window.gameControl.toggleFullscreen()">
         <svg id="fs-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
@@ -149,7 +150,7 @@
             <h1 class="text-3xl md:text-6xl font-game font-black mb-1 italic uppercase tracking-tighter text-center">
                 LOGAN'S <span class="text-sky-500">GEOMETRIE</span> CRASH
             </h1>
-            <p class="text-slate-500 mb-8 text-[10px] tracking-[0.5em] uppercase font-bold text-center">Pro Landscape Edition • v2.7</p>
+            <p class="text-slate-500 mb-8 text-[10px] tracking-[0.5em] uppercase font-bold text-center">Delta Engine • v2.9 Stable</p>
             <div class="flex flex-row space-x-4">
                 <button class="btn-menu bg-emerald-500 text-white font-game" onclick="window.gameControl.start('leicht')">Leicht</button>
                 <button class="btn-menu bg-amber-500 text-white font-game" onclick="window.gameControl.start('mittel')">Mittel</button>
@@ -161,7 +162,7 @@
         <!-- Crash Menü -->
         <div id="menu-crash" class="menu-box" style="display:none;">
             <h2 class="text-5xl font-game font-black text-rose-500 mb-2 italic uppercase">Crash</h2>
-            <div class="text-8xl font-game font-black text-white mb-10" id="final-score">0</div>
+            <div class="text-8xl font-game font-black text-white mb-8" id="final-score">0</div>
             <div class="flex flex-row space-x-4">
                 <button class="btn-menu bg-sky-500 text-slate-950 font-game shadow-none" onclick="window.gameControl.start(window.currentDiff)">Nochmal</button>
                 <button class="btn-menu bg-white text-slate-950 font-game shadow-none" onclick="window.gameControl.home()">Menü</button>
@@ -181,9 +182,9 @@
         </div>
     </div>
 
-    <!-- Steuerung -->
+    <!-- Multitouch Controls -->
     <div id="controls" class="controls-container" style="display:none;">
-        <div class="flex space-x-8">
+        <div class="flex space-x-10">
             <div id="btn-L" class="ctrl-btn btn-arrow">←</div>
             <div id="btn-R" class="ctrl-btn btn-arrow">→</div>
         </div>
@@ -210,15 +211,19 @@
         hudBest: document.getElementById('hud-best')
     };
 
-    let cw, ch, active = false, score = 0, frames = 0;
-    const input = { L: false, R: false, J: false };
-    const HS_KEY = 'logans_crash_highscore_v27_balanced';
+    let cw, ch, active = false, score = 0;
+    let lastTime = 0;
+    let spawnAccumulator = 0;
+    let sideAccumulator = 0;
 
-    // Neu kalibrierte Physik: Mehr Air-Time und sanftere Kurven
+    const input = { L: false, R: false, J: false };
+    const HS_KEY = 'logans_crash_highscore_v29_pixel_fix';
+
+    // Kalibrierung (Pixel pro Sekunde / Zeit-basiert)
     const settings = {
-        leicht: { jP: -12.2, spawn: 85, side: 240, g: 0.40, pSpeed: 8.5, color: '#10b981' },
-        mittel: { jP: -11.2, spawn: 60, side: 170, g: 0.46, pSpeed: 10, color: '#f59e0b' },
-        schwer: { jP: -10.2, spawn: 38, side: 115, g: 0.52, pSpeed: 11.5, color: '#ef4444' }
+        leicht: { jP: -12.5, spawnMs: 1400, sideMs: 3500, g: 0.38, speed: 9.0, color: '#10b981' },
+        mittel: { jP: -11.5, spawnMs: 1000, sideMs: 2800, g: 0.44, speed: 10.5, color: '#f59e0b' },
+        schwer: { jP: -10.5, spawnMs: 700, sideMs: 2000, g: 0.50, speed: 12.0, color: '#ef4444' }
     };
 
     const player = {
@@ -242,7 +247,6 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // Highscore Management
     const getHS = () => localStorage.getItem(HS_KEY) || 0;
     const saveHS = (s) => { if(s > getHS()) localStorage.setItem(HS_KEY, s); };
     const refreshHS = () => {
@@ -252,13 +256,13 @@
     };
     refreshHS();
 
-    // Multitouch Button Binding
+    // Multitouch Logic
     const bind = (id, key) => {
         const el = document.getElementById(id);
         const start = (e) => { 
             e.preventDefault(); 
             input[key] = true; 
-            if(key === 'J') doJump(); // Jump priorisiert sofort auslösen
+            if(key === 'J') triggerJump(); 
         };
         const end = (e) => { 
             e.preventDefault(); 
@@ -273,29 +277,29 @@
     bind('btn-R', 'R');
     bind('btn-J', 'J');
 
-    // API
     window.gameControl = {
         start: (d) => {
             window.currentDiff = d;
             const s = settings[d];
             player.jP = s.jP;
             player.g = s.g;
-            player.speed = s.pSpeed;
+            player.speed = s.speed;
             
-            score = 0; frames = 0;
+            score = 0; spawnAccumulator = 0; sideAccumulator = 0;
             enemies = []; sides = []; fx = [];
             ui.live.innerText = "0";
             ui.start.style.display = 'none';
             ui.crash.style.display = 'none';
             ui.hud.style.display = 'flex';
             ui.controls.style.display = 'flex';
-            active = true;
             
+            active = true;
             player.x = cw / 2 - player.size / 2;
             player.y = player.ground;
             player.vy = 0; player.jumping = false;
             player.trail = [];
             refreshHS();
+            lastTime = performance.now();
         },
         home: () => {
             active = false;
@@ -314,7 +318,7 @@
         }
     };
 
-    function doJump() {
+    function triggerJump() {
         if(!player.jumping && active) {
             player.vy = player.jP;
             player.jumping = true;
@@ -331,11 +335,11 @@
     function spawnEnemy() {
         let px = Math.random() * (cw - 80);
         let evo = 1;
-        if(score > 120) evo = 3; else if(score > 45) evo = 2;
+        if(score > 120) evo = 3; else if(score > 40) evo = 2;
 
         enemies.push({
             x: px, y: -100, size: 28 + Math.random()*22,
-            speed: 3.0 + (score / 60), // Sanftere Geschwindigkeitskurve
+            speed: 3.5 + (score / 60), 
             rot: 0, rotS: (Math.random()-0.5)*0.1,
             evo, type: Math.random() > 0.5 ? 'rect' : 'circle'
         });
@@ -347,22 +351,21 @@
             x: fromLeft ? -60 : cw + 60,
             y: player.ground + (player.size - 32),
             size: 32,
-            speed: fromLeft ? (5.0 + score/55) : -(5.0 + score/55),
+            speed: fromLeft ? (5.5 + score/50) : -(5.5 + score/50),
             color: settings[window.currentDiff].color
         });
     }
 
-    function update() {
+    function update(dt) {
         if(!active) return;
 
-        // Multitouch Handling: Unabhängige Verarbeitung
-        if(input.L) player.x -= player.speed;
-        if(input.R) player.x += player.speed;
-        if(input.J) doJump();
+        // dt ist das Verhältnis zur 60fps Basis (dt=1.0 bedeutet 16.6ms vergangen)
+        if(input.L) player.x -= player.speed * dt;
+        if(input.R) player.x += player.speed * dt;
 
         player.x = Math.max(0, Math.min(cw - player.size, player.x));
-        player.vy += player.g;
-        player.y += player.vy;
+        player.vy += player.g * dt;
+        player.y += player.vy * dt;
         
         if(player.y >= player.ground) {
             player.y = player.ground;
@@ -373,25 +376,36 @@
         player.trail.push({x: player.x, y: player.y});
         if(player.trail.length > 8) player.trail.shift();
 
-        frames++;
+        // Zeit-basiertes Spawning
         const s = settings[window.currentDiff];
-        if(frames % s.spawn === 0) spawnEnemy();
-        if(frames % s.side === 0) spawnSide();
+        const msPerFrame = dt * 16.66;
+        spawnAccumulator += msPerFrame;
+        sideAccumulator += msPerFrame;
+
+        if(spawnAccumulator >= s.spawnMs) {
+            spawnEnemy();
+            spawnAccumulator = 0;
+        }
+        if(sideAccumulator >= s.sideMs) {
+            spawnSide();
+            sideAccumulator = 0;
+        }
 
         enemies.forEach((e, i) => {
-            e.y += e.speed; e.rot += e.rotS;
+            e.y += e.speed * dt; 
+            e.rot += e.rotS * dt;
             if(checkHit(player, e)) crash();
             if(e.y > ch + 100) { enemies.splice(i, 1); score++; ui.live.innerText = score; }
         });
 
         sides.forEach((e, i) => {
-            e.x += e.speed;
+            e.x += e.speed * dt;
             if(checkHit(player, e)) crash();
             if(e.x < -150 || e.x > cw + 150) sides.splice(i, 1);
         });
 
         fx.forEach((p, i) => {
-            p.x += p.vx; p.y += p.vy; p.l -= 0.04;
+            p.x += p.vx * dt; p.y += p.vy * dt; p.l -= 0.04 * dt;
             if(p.l <= 0) fx.splice(i, 1);
         });
     }
@@ -419,7 +433,6 @@
 
     function draw() {
         ctx.clearRect(0, 0, cw, ch);
-        
         ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 3;
         ctx.beginPath(); ctx.moveTo(0, player.ground + player.size); ctx.lineTo(cw, player.ground + player.size); ctx.stroke();
 
@@ -464,8 +477,7 @@
 
         const tLen = player.trail.length;
         player.trail.forEach((t, i) => {
-            const a = tLen > 0 ? (i / tLen) * 0.35 : 0;
-            ctx.globalAlpha = a;
+            ctx.globalAlpha = tLen > 0 ? (i / tLen) * 0.35 : 0;
             ctx.fillStyle = '#38bdf8';
             ctx.fillRect(t.x, t.y, player.size, player.size);
         });
@@ -481,12 +493,20 @@
         ctx.fillRect(player.x+player.size-13, player.y+10, 5, 5);
     }
 
-    function loop() {
-        update();
+    function loop(now) {
+        if (!lastTime) lastTime = now;
+        const delta = now - lastTime;
+        lastTime = now;
+
+        // Normalisiere delta auf 60fps (16.6ms = 1.0)
+        const dt = delta / 16.66;
+        
+        // Begrenze dt um extreme Sprünge bei Lag zu vermeiden
+        update(Math.min(dt, 2.0));
         draw();
         requestAnimationFrame(loop);
     }
-    loop();
+    requestAnimationFrame(loop);
 })();
 </script>
 </body>
