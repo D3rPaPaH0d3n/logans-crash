@@ -10,7 +10,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#020617">
     
-    <!-- Custom SVG Icon (Favicon & Home Screen) -->
+    <!-- Custom SVG Icon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23020617'/%3E%3Crect x='20' y='45' width='25' height='25' rx='4' fill='%2338bdf8'/%3E%3Cpath d='M60 70 L80 70 L70 50 Z' fill='%23ef4444'/%3E%3Cpath d='M20 40 Q40 10 70 40' fill='none' stroke='%2338bdf8' stroke-width='4' stroke-dasharray='4 4'/%3E%3C/svg%3E">
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23020617'/%3E%3Crect x='20' y='45' width='25' height='25' rx='4' fill='%2338bdf8'/%3E%3Cpath d='M60 70 L80 70 L70 50 Z' fill='%23ef4444'/%3E%3C/svg%3E">
 
@@ -34,7 +34,6 @@
 
         .font-game { font-family: 'Orbitron', sans-serif; }
 
-        /* Orientierungs-Warnung */
         #orientation-msg {
             display: none;
             position: fixed; inset: 0;
@@ -47,7 +46,6 @@
             #orientation-msg { display: flex; }
         }
 
-        /* UI Layer Management */
         .ui-layer {
             position: absolute; inset: 0;
             z-index: 100; pointer-events: none;
@@ -63,7 +61,6 @@
             pointer-events: auto;
         }
 
-        /* Ergonomische Ghost-Controls */
         .controls-container {
             position: absolute; 
             bottom: 60px; 
@@ -90,10 +87,7 @@
         }
 
         .btn-arrow { width: 90px; height: 90px; font-size: 2.5rem; color: rgba(56, 189, 248, 0.2); }
-        .btn-jump { 
-            width: 120px; height: 120px; border-radius: 50%; 
-            border-width: 2px; border-color: rgba(56, 189, 248, 0.15); 
-        }
+        .btn-jump { width: 120px; height: 120px; border-radius: 50%; border-width: 2px; border-color: rgba(56, 189, 248, 0.15); }
 
         .btn-label {
             font-family: 'Orbitron', sans-serif;
@@ -150,7 +144,7 @@
             <h1 class="text-3xl md:text-6xl font-game font-black mb-1 italic uppercase tracking-tighter text-center">
                 LOGAN'S <span class="text-sky-500">GEOMETRIE</span> CRASH
             </h1>
-            <p class="text-slate-500 mb-8 text-[10px] tracking-[0.5em] uppercase font-bold text-center">Ultimate Hybrid Edition • v3.8</p>
+            <p class="text-slate-500 mb-8 text-[10px] tracking-[0.5em] uppercase font-bold text-center">Haptic Edition • v4.0</p>
             <div class="flex flex-row flex-wrap justify-center">
                 <div class="flex flex-col items-center">
                     <button class="btn-menu bg-emerald-500 text-white font-game" onclick="window.gameControl.start('leicht')">Leicht</button>
@@ -169,7 +163,7 @@
 
         <!-- Crash Menü -->
         <div id="menu-crash" class="menu-box" style="display:none;">
-            <h2 class="text-5xl font-game font-black text-rose-500 mb-2 italic uppercase">System Crash</h2>
+            <h2 class="text-5xl font-game font-black text-rose-500 mb-2 italic uppercase text-center">System Crash</h2>
             <div class="text-8xl font-game font-black text-white mb-4" id="final-score">0</div>
             <div class="text-sky-400 text-xs font-bold uppercase mb-8 tracking-widest" id="new-record-msg" style="display:none;">NEUER REKORD!</div>
             <div class="flex flex-row space-x-4">
@@ -191,7 +185,7 @@
         </div>
     </div>
 
-    <!-- Mobile Controls -->
+    <!-- Controls -->
     <div id="controls" class="controls-container" style="display:none;">
         <div class="flex space-x-10">
             <div id="btn-L" class="ctrl-btn btn-arrow">←</div>
@@ -209,8 +203,15 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     
-    // Audio State
+    // Core Engine State
     let audioCtx = null;
+    let cw, ch, active = false, score = 0;
+    let lastTime = 0;
+    let spawnAccumulator = 0;
+    let sideAccumulator = 0;
+
+    const input = { L: false, R: false, J: false };
+    const HS_PREFIX = 'logans_crash_hs_v40_final_';
 
     const ui = {
         start: document.getElementById('menu-start'),
@@ -229,15 +230,6 @@
         }
     };
 
-    let cw, ch, active = false, score = 0;
-    let lastTime = 0;
-    let spawnAccumulator = 0;
-    let sideAccumulator = 0;
-
-    const input = { L: false, R: false, J: false };
-    const HS_PREFIX = 'logans_crash_hs_v38_final_';
-
-    // Kalibrierung der Zeit-basierten Physik (Pixel pro Sekunde)
     const settings = {
         leicht: { jP: -12.5, spawnMs: 1450, sideMs: 4000, g: 0.38, speed: 9.0, color: '#10b981' },
         mittel: { jP: -11.5, spawnMs: 1050, sideMs: 3000, g: 0.44, speed: 10.5, color: '#f59e0b' },
@@ -270,13 +262,20 @@
         osc.start(); osc.stop(audioCtx.currentTime + duration);
     }
 
+    // --- Haptics Engine (Vibration) ---
+    const haptics = {
+        jump: () => { if (navigator.vibrate) navigator.vibrate(12); },
+        bonus: () => { if (navigator.vibrate) navigator.vibrate([30, 50, 30]); },
+        crash: () => { if (navigator.vibrate) navigator.vibrate(150); }
+    };
+
     const sound = {
-        jump: () => playTone(220, 580, 0.15, 'sine', 0.12),
+        jump: () => playTone(220, 580, 0.15, 'sine', 0.1),
         bonus: () => {
-            playTone(600, 1100, 0.1, 'sine', 0.18);
-            setTimeout(() => playTone(800, 1500, 0.15, 'sine', 0.18), 50);
+            playTone(600, 1100, 0.1, 'sine', 0.15);
+            setTimeout(() => playTone(800, 1500, 0.15, 'sine', 0.15), 50);
         },
-        crash: () => playTone(350, 40, 0.45, 'sawtooth', 0.22)
+        crash: () => playTone(350, 40, 0.45, 'sawtooth', 0.2)
     };
 
     function resize() {
@@ -299,7 +298,7 @@
     };
     refreshHSDisplay();
 
-    // PC Keys (WASD / Arrows / Space)
+    // PC Keys Support
     window.addEventListener('keydown', e => {
         if (!active) return;
         switch(e.code) {
@@ -317,7 +316,7 @@
         }
     });
 
-    // Mobile Interaction
+    // Mobile Input
     const bind = (id, key) => {
         const el = document.getElementById(id);
         el.addEventListener('touchstart', (e) => { 
@@ -355,6 +354,7 @@
             player.vy = player.jP; 
             player.jumping = true; 
             sound.jump(); 
+            haptics.jump();
             spawnFX(player.x + player.size/2, player.y + player.size, '#38bdf8', 12, 1); 
         }
     }
@@ -365,6 +365,7 @@
 
     function spawnFirework(x, y) {
         sound.bonus(); 
+        haptics.bonus();
         const colors = ['#fbbf24', '#f472b6', '#38bdf8', '#10b981', '#f59e0b', '#ffffff'];
         for(let i=0; i<60; i++) fx.push({ x, y, vx: (Math.random()-0.5)*25, vy: (Math.random()-0.5)*25, l: 1.5, col: colors[Math.floor(Math.random()*colors.length)] });
         fx.push({ x, y: y - 40, vx: 0, vy: -1.5, l: 2.0, col: '#fbbf24', text: '+5', isText: true });
@@ -390,7 +391,6 @@
     function update(dt) {
         if(!active) return;
         
-        // Multi-Axis Input Handling
         if(input.L) player.x -= player.speed * dt;
         if(input.R) player.x += player.speed * dt;
         
@@ -429,7 +429,10 @@
     }
 
     function crash() {
-        active = false; sound.crash(); spawnFX(player.x + player.size/2, player.y + player.size/2, '#ef4444', 35, 1);
+        active = false; 
+        sound.crash(); 
+        haptics.crash();
+        spawnFX(player.x + player.size/2, player.y + player.size/2, '#ef4444', 35, 1);
         ui.final.innerText = score; ui.hud.style.display = 'none'; ui.controls.style.display = 'none'; ui.crash.style.display = 'flex';
         if(saveHS(window.currentDiff, score)) ui.newRecord.style.display = 'block';
     }
