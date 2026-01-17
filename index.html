@@ -34,7 +34,6 @@
 
         .font-game { font-family: 'Orbitron', sans-serif; }
 
-        /* Orientierungs-Warnung */
         #orientation-msg {
             display: none;
             position: fixed; inset: 0;
@@ -47,7 +46,6 @@
             #orientation-msg { display: flex; }
         }
 
-        /* UI Layer */
         .ui-layer {
             position: absolute; inset: 0;
             z-index: 100; pointer-events: none;
@@ -63,10 +61,9 @@
             pointer-events: auto;
         }
 
-        /* Virtuelle Buttons - Höher und Transparenter für freies Sichtfeld */
         .controls-container {
             position: absolute; 
-            bottom: 60px; /* Deutlich höher für Sichtbarkeit der Boden-Hindernisse */
+            bottom: 60px; 
             width: 100%; padding: 0 60px;
             display: flex; justify-content: space-between;
             align-items: flex-end;
@@ -74,7 +71,7 @@
         }
 
         .ctrl-btn {
-            background: rgba(255, 255, 255, 0.02); /* Fast unsichtbar */
+            background: rgba(255, 255, 255, 0.02); 
             border: 1px solid rgba(56, 189, 248, 0.1); 
             backdrop-filter: blur(1px);
             border-radius: 20px;
@@ -150,19 +147,28 @@
             <h1 class="text-3xl md:text-6xl font-game font-black mb-1 italic uppercase tracking-tighter text-center">
                 LOGAN'S <span class="text-sky-500">GEOMETRIE</span> CRASH
             </h1>
-            <p class="text-slate-500 mb-8 text-[10px] tracking-[0.5em] uppercase font-bold text-center">Delta Engine • v2.9 Stable</p>
-            <div class="flex flex-row space-x-4">
-                <button class="btn-menu bg-emerald-500 text-white font-game" onclick="window.gameControl.start('leicht')">Leicht</button>
-                <button class="btn-menu bg-amber-500 text-white font-game" onclick="window.gameControl.start('mittel')">Mittel</button>
-                <button class="btn-menu bg-rose-500 text-white font-game" onclick="window.gameControl.start('schwer')">Schwer</button>
+            <p class="text-slate-500 mb-8 text-[10px] tracking-[0.5em] uppercase font-bold text-center">Shape Mix Edition • v3.5</p>
+            <div class="flex flex-row flex-wrap justify-center">
+                <div class="flex flex-col items-center">
+                    <button class="btn-menu bg-emerald-500 text-white font-game" onclick="window.gameControl.start('leicht')">Leicht</button>
+                    <span class="text-[10px] text-emerald-400 uppercase font-bold" id="hs-leicht">Best: 0</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <button class="btn-menu bg-amber-500 text-white font-game" onclick="window.gameControl.start('mittel')">Mittel</button>
+                    <span class="text-[10px] text-amber-400 uppercase font-bold" id="hs-mittel">Best: 0</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <button class="btn-menu bg-rose-500 text-white font-game" onclick="window.gameControl.start('schwer')">Schwer</button>
+                    <span class="text-[10px] text-rose-400 uppercase font-bold" id="hs-schwer">Best: 0</span>
+                </div>
             </div>
-            <p class="mt-8 text-slate-500 font-mono text-sm uppercase" id="hs-display">Highscore: 0</p>
         </div>
 
         <!-- Crash Menü -->
         <div id="menu-crash" class="menu-box" style="display:none;">
             <h2 class="text-5xl font-game font-black text-rose-500 mb-2 italic uppercase">Crash</h2>
-            <div class="text-8xl font-game font-black text-white mb-8" id="final-score">0</div>
+            <div class="text-8xl font-game font-black text-white mb-4" id="final-score">0</div>
+            <div class="text-sky-400 text-xs font-bold uppercase mb-8 tracking-widest" id="new-record-msg" style="display:none;">NEUER REKORD!</div>
             <div class="flex flex-row space-x-4">
                 <button class="btn-menu bg-sky-500 text-slate-950 font-game shadow-none" onclick="window.gameControl.start(window.currentDiff)">Nochmal</button>
                 <button class="btn-menu bg-white text-slate-950 font-game shadow-none" onclick="window.gameControl.home()">Menü</button>
@@ -171,13 +177,13 @@
     </div>
 
     <!-- HUD -->
-    <div id="hud" class="fixed top-4 left-6 right-6 flex justify-between z-[120] pointer-events-none" style="display:none;">
+    <div id="hud" class="fixed top-4 left-6 flex space-x-4 z-[120] pointer-events-none" style="display:none;">
         <div class="hud-box">
             <div class="text-[9px] text-sky-400 uppercase font-black">Score</div>
             <div class="text-2xl font-black font-game" id="live-score">0</div>
         </div>
         <div class="hud-box text-right">
-            <div class="text-[9px] text-slate-400 uppercase font-black">Best</div>
+            <div class="text-[9px] text-slate-400 uppercase font-black">Best (<span id="hud-mode-name">-</span>)</div>
             <div class="text-xl font-bold font-game" id="hud-best">0</div>
         </div>
     </div>
@@ -207,8 +213,14 @@
         hud: document.getElementById('hud'),
         live: document.getElementById('live-score'),
         final: document.getElementById('final-score'),
-        best: document.getElementById('hs-display'),
-        hudBest: document.getElementById('hud-best')
+        hudBest: document.getElementById('hud-best'),
+        hudMode: document.getElementById('hud-mode-name'),
+        newRecord: document.getElementById('new-record-msg'),
+        hsLabels: {
+            leicht: document.getElementById('hs-leicht'),
+            mittel: document.getElementById('hs-mittel'),
+            schwer: document.getElementById('hs-schwer')
+        }
     };
 
     let cw, ch, active = false, score = 0;
@@ -217,13 +229,12 @@
     let sideAccumulator = 0;
 
     const input = { L: false, R: false, J: false };
-    const HS_KEY = 'logans_crash_highscore_v29_pixel_fix';
+    const HS_PREFIX = 'logans_crash_hs_v35_';
 
-    // Kalibrierung (Pixel pro Sekunde / Zeit-basiert)
     const settings = {
-        leicht: { jP: -12.5, spawnMs: 1400, sideMs: 3500, g: 0.38, speed: 9.0, color: '#10b981' },
-        mittel: { jP: -11.5, spawnMs: 1000, sideMs: 2800, g: 0.44, speed: 10.5, color: '#f59e0b' },
-        schwer: { jP: -10.5, spawnMs: 700, sideMs: 2000, g: 0.50, speed: 12.0, color: '#ef4444' }
+        leicht: { jP: -12.5, spawnMs: 1450, sideMs: 3800, g: 0.38, speed: 9.0, color: '#10b981' },
+        mittel: { jP: -11.5, spawnMs: 1050, sideMs: 3000, g: 0.44, speed: 10.5, color: '#f59e0b' },
+        schwer: { jP: -10.5, spawnMs: 750, sideMs: 2200, g: 0.50, speed: 12.0, color: '#ef4444' }
     };
 
     const player = {
@@ -247,14 +258,44 @@
     window.addEventListener('resize', resize);
     resize();
 
-    const getHS = () => localStorage.getItem(HS_KEY) || 0;
-    const saveHS = (s) => { if(s > getHS()) localStorage.setItem(HS_KEY, s); };
-    const refreshHS = () => {
-        const hs = getHS();
-        ui.best.innerText = "Dein Rekord: " + hs;
-        ui.hudBest.innerText = hs;
+    const getHS = (diff) => localStorage.getItem(HS_PREFIX + diff) || 0;
+    const saveHS = (diff, s) => { 
+        const best = parseInt(getHS(diff));
+        if(s > best) {
+            localStorage.setItem(HS_PREFIX + diff, s);
+            return true;
+        }
+        return false;
     };
-    refreshHS();
+
+    const refreshHSDisplay = () => {
+        Object.keys(settings).forEach(key => {
+            ui.hsLabels[key].innerText = "Best: " + getHS(key);
+        });
+    };
+    refreshHSDisplay();
+
+    // Tastatur Steuerung (PC Support)
+    window.addEventListener('keydown', e => {
+        if (!active) return;
+        switch(e.code) {
+            case 'ArrowLeft': case 'KeyA': input.L = true; break;
+            case 'ArrowRight': case 'KeyD': input.R = true; break;
+            case 'ArrowUp': case 'KeyW': case 'Space': 
+                input.J = true; 
+                triggerJump();
+                break;
+        }
+        if(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
+    });
+
+    window.addEventListener('keyup', e => {
+        switch(e.code) {
+            case 'ArrowLeft': case 'KeyA': input.L = false; break;
+            case 'ArrowRight': case 'KeyD': input.R = false; break;
+            case 'ArrowUp': case 'KeyW': case 'Space': input.J = false; break;
+        }
+    });
 
     // Multitouch Logic
     const bind = (id, key) => {
@@ -288,8 +329,12 @@
             score = 0; spawnAccumulator = 0; sideAccumulator = 0;
             enemies = []; sides = []; fx = [];
             ui.live.innerText = "0";
+            ui.hudBest.innerText = getHS(d);
+            ui.hudMode.innerText = d.toUpperCase();
+            
             ui.start.style.display = 'none';
             ui.crash.style.display = 'none';
+            ui.newRecord.style.display = 'none';
             ui.hud.style.display = 'flex';
             ui.controls.style.display = 'flex';
             
@@ -298,7 +343,6 @@
             player.y = player.ground;
             player.vy = 0; player.jumping = false;
             player.trail = [];
-            refreshHS();
             lastTime = performance.now();
         },
         home: () => {
@@ -307,7 +351,7 @@
             ui.hud.style.display = 'none';
             ui.controls.style.display = 'none';
             ui.start.style.display = 'flex';
-            refreshHS();
+            refreshHSDisplay();
         },
         toggleFullscreen: () => {
             if (!document.fullscreenElement) {
@@ -322,26 +366,67 @@
         if(!player.jumping && active) {
             player.vy = player.jP;
             player.jumping = true;
-            spawnFX(player.x + player.size/2, player.y + player.size, '#38bdf8', 12);
+            spawnFX(player.x + player.size/2, player.y + player.size, '#38bdf8', 12, 1);
         }
     }
 
-    function spawnFX(x, y, col, n) {
+    function spawnFX(x, y, col, n, force) {
         for(let i=0; i<n; i++) {
-            fx.push({x, y, vx:(Math.random()-0.5)*12, vy:(Math.random()-0.5)*12, l:1, col});
+            fx.push({
+                x, y, 
+                vx:(Math.random()-0.5)*12 * force, 
+                vy:(Math.random()-0.5)*12 * force, 
+                l:1.0, col
+            });
         }
+    }
+
+    function spawnFirework(x, y) {
+        const colors = ['#fbbf24', '#f472b6', '#38bdf8', '#10b981', '#f59e0b', '#ffffff'];
+        for(let i=0; i<60; i++) {
+            const col = colors[Math.floor(Math.random()*colors.length)];
+            fx.push({
+                x: x, y: y,
+                vx: (Math.random()-0.5)*25,
+                vy: (Math.random()-0.5)*25,
+                l: 1.5, col
+            });
+        }
+        // Floating Bonus Text
+        fx.push({
+            x: x, y: y - 40,
+            vx: 0, vy: -1.5,
+            l: 2.0, col: '#fbbf24',
+            text: '+5',
+            isText: true
+        });
+    }
+
+    function getRandomColor() {
+        const h = Math.floor(Math.random() * 360);
+        return `hsl(${h}, 70%, 55%)`;
     }
 
     function spawnEnemy() {
         let px = Math.random() * (cw - 80);
-        let evo = 1;
-        if(score > 120) evo = 3; else if(score > 40) evo = 2;
+        const isSuper = Math.random() < 0.05; 
+        
+        // MIX-LOGIK: Alle bisher freigeschalteten Komplexitäten werden gemischt
+        let maxEvo = 1;
+        if(score > 120) maxEvo = 3; else if(score > 40) maxEvo = 2;
+        const evo = isSuper ? 1 : Math.ceil(Math.random() * maxEvo);
+
+        const types = ['rect', 'circle', 'triangle', 'pentagon'];
+        const type = isSuper ? 'star' : types[Math.floor(Math.random() * types.length)];
 
         enemies.push({
-            x: px, y: -100, size: 28 + Math.random()*22,
-            speed: 3.5 + (score / 60), 
+            x: px, y: -100, size: isSuper ? 32 : (28 + Math.random()*22),
+            speed: isSuper ? 2.5 : (3.2 + (score / 65)), 
             rot: 0, rotS: (Math.random()-0.5)*0.1,
-            evo, type: Math.random() > 0.5 ? 'rect' : 'circle'
+            evo: evo, 
+            type: type,
+            super: isSuper,
+            color: isSuper ? '#fbbf24' : getRandomColor()
         });
     }
 
@@ -359,7 +444,6 @@
     function update(dt) {
         if(!active) return;
 
-        // dt ist das Verhältnis zur 60fps Basis (dt=1.0 bedeutet 16.6ms vergangen)
         if(input.L) player.x -= player.speed * dt;
         if(input.R) player.x += player.speed * dt;
 
@@ -376,7 +460,6 @@
         player.trail.push({x: player.x, y: player.y});
         if(player.trail.length > 8) player.trail.shift();
 
-        // Zeit-basiertes Spawning
         const s = settings[window.currentDiff];
         const msPerFrame = dt * 16.66;
         spawnAccumulator += msPerFrame;
@@ -394,8 +477,25 @@
         enemies.forEach((e, i) => {
             e.y += e.speed * dt; 
             e.rot += e.rotS * dt;
-            if(checkHit(player, e)) crash();
-            if(e.y > ch + 100) { enemies.splice(i, 1); score++; ui.live.innerText = score; }
+            
+            if(checkHit(player, e)) {
+                if(e.super) {
+                    score += 5;
+                    ui.live.innerText = score;
+                    spawnFirework(e.x + e.size/2, e.y + e.size/2);
+                    enemies.splice(i, 1);
+                } else {
+                    crash();
+                }
+            }
+            
+            if(e.y > ch + 100) { 
+                enemies.splice(i, 1); 
+                if(!e.super) {
+                    score++; 
+                    ui.live.innerText = score; 
+                }
+            }
         });
 
         sides.forEach((e, i) => {
@@ -405,7 +505,7 @@
         });
 
         fx.forEach((p, i) => {
-            p.x += p.vx * dt; p.y += p.vy * dt; p.l -= 0.04 * dt;
+            p.x += p.vx * dt; p.y += p.vy * dt; p.l -= 0.02 * dt;
             if(p.l <= 0) fx.splice(i, 1);
         });
     }
@@ -421,14 +521,27 @@
                p.y + pad < oy + b && p.y + p.size - pad > oy;
     }
 
+    function drawPolygon(x, y, radius, sides, rotation) {
+        ctx.beginPath();
+        for (let i = 0; i < sides; i++) {
+            const angle = rotation + (i * 2 * Math.PI) / sides;
+            const px = x + radius * Math.cos(angle);
+            const py = y + radius * Math.sin(angle);
+            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+    }
+
     function crash() {
         active = false;
-        spawnFX(player.x + player.size/2, player.y + player.size/2, '#ef4444', 35);
+        spawnFX(player.x + player.size/2, player.y + player.size/2, '#ef4444', 35, 1);
         ui.final.innerText = score;
         ui.hud.style.display = 'none';
         ui.controls.style.display = 'none';
         ui.crash.style.display = 'flex';
-        saveHS(score);
+        const isNew = saveHS(window.currentDiff, score);
+        if(isNew) ui.newRecord.style.display = 'block';
     }
 
     function draw() {
@@ -437,8 +550,14 @@
         ctx.beginPath(); ctx.moveTo(0, player.ground + player.size); ctx.lineTo(cw, player.ground + player.size); ctx.stroke();
 
         fx.forEach(p => {
-            ctx.globalAlpha = p.l; ctx.fillStyle = p.col;
-            ctx.fillRect(p.x, p.y, 3, 3);
+            ctx.globalAlpha = Math.max(0, p.l); 
+            ctx.fillStyle = p.col;
+            if(p.isText) {
+                ctx.font = `900 ${24 * p.l}px Orbitron`;
+                ctx.fillText(p.text, p.x, p.y);
+            } else {
+                ctx.fillRect(p.x, p.y, 4, 4);
+            }
         });
         ctx.globalAlpha = 1;
 
@@ -446,26 +565,40 @@
             ctx.save();
             ctx.translate(e.x + e.size/2, e.y + e.size/2);
             ctx.rotate(e.rot);
-            ctx.fillStyle = '#475569';
-            if(e.type === 'rect') ctx.fillRect(-e.size/2, -e.size/2, e.size, e.size);
-            else { ctx.beginPath(); ctx.arc(0,0, e.size/2, 0, Math.PI*2); ctx.fill(); }
+            ctx.fillStyle = e.color;
+            
+            if(e.super) {
+                const pulse = 1 + Math.sin(Date.now() / 100) * 0.1;
+                ctx.scale(pulse, pulse);
+                ctx.shadowBlur = 15; ctx.shadowColor = '#fbbf24';
+                drawPolygon(0, 0, e.size/2, 5, -Math.PI/2); // Stern-Basis
+            } else {
+                // Verschiedene Geometrien
+                switch(e.type) {
+                    case 'rect': ctx.fillRect(-e.size/2, -e.size/2, e.size, e.size); break;
+                    case 'circle': ctx.beginPath(); ctx.arc(0,0, e.size/2, 0, Math.PI*2); ctx.fill(); break;
+                    case 'triangle': drawPolygon(0, 0, e.size/2, 3, 0); break;
+                    case 'pentagon': drawPolygon(0, 0, e.size/2, 5, 0); break;
+                }
 
-            if(e.evo >= 2) {
-                ctx.fillStyle = '#334155';
-                const s = e.size * 0.45;
-                ctx.fillRect(-e.size/2 - s, -s/2, s, s);
-                ctx.fillRect(e.size/2, -s/2, s, s);
-                ctx.fillRect(-s/2, -e.size/2 - s, s, s);
-                ctx.fillRect(-s/2, e.size/2, s, s);
-            }
-            if(e.evo >= 3) {
-                ctx.strokeStyle = '#64748b'; ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.arc(0, 0, e.size * 1.35, 0, Math.PI*2); ctx.stroke();
-                ctx.fillStyle = '#1e293b';
-                ctx.fillRect(-e.size*1.65, -2, e.size*3.3, 4);
-                ctx.fillRect(-2, -e.size*1.65, 4, e.size*3.3);
+                if(e.evo >= 2) {
+                    ctx.globalAlpha = 0.6;
+                    const s = e.size * 0.45;
+                    ctx.fillRect(-e.size/2 - s, -s/2, s, s);
+                    ctx.fillRect(e.size/2, -s/2, s, s);
+                    ctx.fillRect(-s/2, -e.size/2 - s, s, s);
+                    ctx.fillRect(-s/2, e.size/2, s, s);
+                }
+                if(e.evo >= 3) {
+                    ctx.strokeStyle = e.color; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.arc(0, 0, e.size * 1.35, 0, Math.PI*2); ctx.stroke();
+                    ctx.globalAlpha = 0.4;
+                    ctx.fillRect(-e.size*1.65, -2, e.size*3.3, 4);
+                    ctx.fillRect(-2, -e.size*1.65, 4, e.size*3.3);
+                }
             }
             ctx.restore();
+            ctx.shadowBlur = 0; ctx.globalAlpha = 1;
         });
 
         sides.forEach(e => {
@@ -497,11 +630,7 @@
         if (!lastTime) lastTime = now;
         const delta = now - lastTime;
         lastTime = now;
-
-        // Normalisiere delta auf 60fps (16.6ms = 1.0)
         const dt = delta / 16.66;
-        
-        // Begrenze dt um extreme Sprünge bei Lag zu vermeiden
         update(Math.min(dt, 2.0));
         draw();
         requestAnimationFrame(loop);
