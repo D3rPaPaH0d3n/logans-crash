@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Logan’s Geometrie Crash</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -12,73 +12,153 @@
             margin: 0; padding: 0; overflow: hidden; 
             background: #020617; touch-action: none; 
             font-family: 'Inter', sans-serif; color: white;
+            user-select: none; -webkit-user-select: none;
         }
-        canvas { display: block; }
+
+        /* Das Canvas füllt den ganzen Bildschirm */
+        canvas { 
+            display: block; 
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 10;
+        }
+
         .font-game { font-family: 'Orbitron', sans-serif; }
-        .overlay {
-            position: absolute; inset: 0;
+
+        /* Warnung bei Hochformat */
+        #orientation-warning {
+            display: none;
+            position: fixed; inset: 0;
+            background: #020617;
+            z-index: 2000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        @media (orientation: portrait) {
+            #orientation-warning { display: flex; }
+        }
+
+        /* UI Overlays über dem Canvas */
+        .game-ui {
+            position: absolute;
+            inset: 0;
+            z-index: 100;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-bg {
+            background: rgba(2, 6, 23, 0.95);
+            width: 100%; height: 100%;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            background: rgba(2, 6, 23, 0.95); z-index: 100;
+            pointer-events: auto;
         }
-        .btn-diff {
-            width: 260px; padding: 20px; margin: 8px;
-            border-radius: 12px; font-weight: 900; font-size: 1.2rem;
-            text-transform: uppercase; letter-spacing: 2px;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: none; box-shadow: 0 6px 0 rgba(0,0,0,0.3);
-            cursor: pointer;
-        }
-        .btn-diff:active { transform: translateY(4px); box-shadow: none; }
-        .btn-leicht { background: #10b981; }
-        .btn-mittel { background: #f59e0b; }
-        .btn-schwer { background: #ef4444; }
-        .btn-retry { background: #38bdf8; color: #020617; }
-        .btn-menu { background: #ffffff; color: #020617; }
 
-        #ui-top {
-            position: absolute; top: 20px; left: 20px; right: 20px;
-            display: flex; justify-content: space-between;
-            pointer-events: none; z-index: 50;
+        /* Touch-Steuerung am unteren Rand */
+        .controls-container {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            z-index: 150;
+            pointer-events: none;
         }
-        .score-box {
-            background: rgba(30, 41, 59, 0.6); padding: 8px 16px;
-            border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.2);
-            backdrop-filter: blur(8px);
+
+        .touch-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(56, 189, 248, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: auto;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.1s, background 0.1s;
+        }
+
+        .touch-btn:active {
+            background: rgba(56, 189, 248, 0.4);
+            transform: scale(0.92);
+        }
+
+        .btn-move { width: 85px; height: 85px; font-size: 2rem; }
+        .btn-jump { width: 110px; height: 110px; border-radius: 50%; border-width: 3px; }
+
+        .btn-start {
+            width: 200px; padding: 18px; margin: 10px;
+            border-radius: 12px; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 2px;
+            border: none; box-shadow: 0 5px 0 rgba(0,0,0,0.3);
+            cursor: pointer;
+            pointer-events: auto;
         }
     </style>
 </head>
 <body>
 
-    <div id="startMenu" class="overlay">
-        <h1 class="text-3xl md:text-5xl font-game font-black mb-2 text-center uppercase tracking-tighter">
-            LOGAN'S <span class="text-sky-500">GEOMETRIE</span> CRASH
-        </h1>
-        <p class="text-slate-500 mb-10 text-xs tracking-[0.3em] uppercase">Wähle deine Schwierigkeit</p>
-        <button class="btn-diff btn-leicht font-game" onclick="window.startGame('leicht')">Leicht</button>
-        <button class="btn-diff btn-mittel font-game" onclick="window.startGame('mittel')">Mittel</button>
-        <button class="btn-diff btn-schwer font-game" onclick="window.startGame('schwer')">Schwer</button>
+    <div id="orientation-warning">
+        <div class="text-sky-500 text-6xl mb-4">↻</div>
+        <h2 class="font-game text-xl uppercase">Gerät drehen</h2>
+        <p class="text-slate-400 mt-2"> Logan’s Geometrie Crash wird im Querformat gespielt.</p>
     </div>
 
-    <div id="gameOver" class="overlay" style="display:none;">
-        <h2 class="text-5xl font-game font-black text-red-500 mb-2 italic text-center uppercase">System Crash</h2>
-        <div class="text-slate-400 text-xs tracking-widest uppercase mb-1">Endergebnis</div>
-        <div class="text-7xl font-game font-black text-white mb-10" id="finalScore">0</div>
-        
-        <div class="flex flex-col space-y-2">
-            <button class="btn-diff btn-retry font-game" onclick="window.startGame(window.getCurrentDiff())">Nochmal</button>
-            <button class="btn-diff btn-menu font-game" onclick="window.resetToMenu()">Menü</button>
+    <!-- UI LAYER -->
+    <div id="ui-layer" class="game-ui">
+        <!-- Startmenü -->
+        <div id="menu-start" class="menu-bg">
+            <h1 class="text-3xl md:text-6xl font-game font-black mb-1 italic">
+                LOGAN'S <span class="text-sky-500">GEOMETRIE</span> CRASH
+            </h1>
+            <p class="text-slate-500 mb-8 text-[10px] tracking-[0.5em] uppercase font-bold text-center">Canvas Landscape Edition</p>
+            <div class="flex flex-row space-x-4">
+                <button class="btn-start bg-emerald-500 text-white font-game" onclick="window.runGame('leicht')">Leicht</button>
+                <button class="btn-start bg-amber-500 text-white font-game" onclick="window.runGame('mittel')">Mittel</button>
+                <button class="btn-start bg-rose-500 text-white font-game" onclick="window.runGame('schwer')">Schwer</button>
+            </div>
+            <p class="mt-8 text-slate-500 font-mono text-sm uppercase" id="highscore-label">Highscore: 0</p>
+        </div>
+
+        <!-- Crash Menü -->
+        <div id="menu-crash" class="menu-bg" style="display:none;">
+            <h2 class="text-5xl font-game font-black text-rose-500 mb-2 italic uppercase">Crash</h2>
+            <div class="text-8xl font-game font-black text-white mb-10" id="final-score">0</div>
+            <div class="flex flex-row space-x-4">
+                <button class="btn-start bg-sky-500 text-slate-950 font-game" onclick="window.runGame(window.currentDiff)">Nochmal</button>
+                <button class="btn-start bg-white text-slate-950 font-game" onclick="window.showHome()">Menü</button>
+            </div>
         </div>
     </div>
 
-    <div id="ui-top">
-        <div class="score-box">
-            <div class="text-[10px] text-sky-400 uppercase font-bold">Punkte</div>
-            <div class="text-2xl font-black font-game" id="liveScore">0</div>
+    <!-- HUD (Score während des Spiels) -->
+    <div id="hud" class="fixed top-4 left-6 right-6 flex justify-between z-[120] pointer-events-none" style="display:none;">
+        <div class="bg-slate-900/60 p-3 rounded-xl border border-sky-500/20 backdrop-blur-md">
+            <div class="text-[9px] text-sky-400 uppercase font-black">Score</div>
+            <div class="text-2xl font-black font-game" id="live-score">0</div>
         </div>
-        <div class="score-box text-right">
-            <div class="text-[10px] text-slate-400 uppercase font-bold">Modus</div>
-            <div class="text-sm font-bold font-game" id="modeDisplay">-</div>
+        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-500/20 backdrop-blur-md text-right">
+            <div class="text-[9px] text-slate-400 uppercase font-black">Level</div>
+            <div class="text-sm font-bold font-game" id="live-mode">-</div>
+        </div>
+    </div>
+
+    <!-- Virtuelle Steuerung am unteren Rand -->
+    <div id="ingame-controls" class="controls-container" style="display:none;">
+        <div class="flex space-x-6">
+            <div id="ctrl-L" class="touch-btn btn-move">←</div>
+            <div id="ctrl-R" class="touch-btn btn-move">→</div>
+        </div>
+        <div>
+            <div id="ctrl-J" class="touch-btn btn-jump font-game text-xs text-white/50 uppercase">Sprung</div>
         </div>
     </div>
 
@@ -88,310 +168,281 @@
 (function() {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    const startMenu = document.getElementById('startMenu');
-    const gameOverMenu = document.getElementById('gameOver');
-    const liveScoreEl = document.getElementById('liveScore');
-    const finalScoreEl = document.getElementById('finalScore');
-    const modeDisplay = document.getElementById('modeDisplay');
-
-    let gameW, gameH, gameActive = false, score = 0, frameCount = 0, currentDifficulty = 'leicht';
-    const inputState = { ArrowLeft: false, ArrowRight: false, ArrowUp: false };
     
-    let touchStartY = 0;
-    let swipeDone = false;
+    // UI Elemente
+    const ui = {
+        start: document.getElementById('menu-start'),
+        crash: document.getElementById('menu-crash'),
+        controls: document.getElementById('ingame-controls'),
+        hud: document.getElementById('hud'),
+        liveScore: document.getElementById('live-score'),
+        finalScore: document.getElementById('final-score'),
+        highscore: document.getElementById('highscore-label'),
+        mode: document.getElementById('live-mode')
+    };
 
-    const gameConfig = {
-        leicht: { jump: -16.5, rate: 55, sideRate: 170, color: '#10b981' },
-        mittel: { jump: -13.8, rate: 40, sideRate: 120, color: '#f59e0b' },
-        schwer: { jump: -11.9, rate: 24, sideRate: 85, color: '#ef4444' }
+    let cw, ch, active = false, score = 0, frame = 0;
+    const input = { left: false, right: false, up: false };
+    const HS_KEY = 'logans_crash_hs';
+
+    // Landscape Physik
+    const settings = {
+        leicht: { jPower: -13.5, spawn: 65, side: 190, g: 0.55, color: '#10b981' },
+        mittel: { jPower: -11.8, spawn: 45, side: 135, g: 0.60, color: '#f59e0b' },
+        schwer: { jPower: -10.5, spawn: 28, side: 95, g: 0.65, color: '#ef4444' }
     };
 
     const player = {
-        x: 0, y: 0, size: 42, vy: 0, grav: 0.8, jumpPower: -16, 
-        groundPos: 0, speed: 10, isJumping: false, trail: []
+        x: 0, y: 0, size: 40, vy: 0, g: 0.6, jPower: -12, 
+        ground: 0, speed: 11, isJumping: false, trail: []
     };
 
-    let enemies = [], sideEnemies = [], fxParticles = [];
+    let enemies = [], sides = [], particles = [];
 
     function resize() {
-        gameW = window.innerWidth;
-        gameH = window.innerHeight;
-        canvas.width = gameW; 
-        canvas.height = gameH;
-        player.groundPos = gameH - 140;
-        if(!gameActive) { 
-            player.x = gameW/2 - player.size/2; 
-            player.y = player.groundPos; 
+        cw = window.innerWidth;
+        ch = window.innerHeight;
+        canvas.width = cw;
+        canvas.height = ch;
+        player.ground = ch - 55; // Würfel am Boden
+        if(!active) {
+            player.x = cw / 2 - player.size / 2;
+            player.y = player.ground;
         }
     }
     window.addEventListener('resize', resize);
     resize();
 
-    window.addEventListener('keydown', e => { 
-        if(e.code === 'ArrowLeft') inputState.ArrowLeft = true;
-        if(e.code === 'ArrowRight') inputState.ArrowRight = true;
-        if(e.code === 'Space' || e.code === 'ArrowUp') inputState.ArrowUp = true;
-        if(["Space", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault();
-    });
-    window.addEventListener('keyup', e => {
-        if(e.code === 'ArrowLeft') inputState.ArrowLeft = false;
-        if(e.code === 'ArrowRight') inputState.ArrowRight = false;
-        if(e.code === 'Space' || e.code === 'ArrowUp') inputState.ArrowUp = false;
-    });
+    // Highscore Logik
+    function getHS() { return localStorage.getItem(HS_KEY) || 0; }
+    function setHS(s) { if(s > getHS()) localStorage.setItem(HS_KEY, s); }
+    function updateHSLabel() { ui.highscore.innerText = "Dein Rekord: " + getHS(); }
+    updateHSLabel();
 
-    canvas.addEventListener('touchstart', e => {
-        if(!gameActive) return;
-        const t = e.touches[0];
-        touchStartY = t.clientY;
-        swipeDone = false;
-        handleMovement(t.clientX);
-        e.preventDefault();
-    }, {passive:false});
+    // Touch-Steuerung binden
+    const bindBtn = (id, key) => {
+        const el = document.getElementById(id);
+        const start = (e) => { e.preventDefault(); input[key] = true; };
+        const end = (e) => { e.preventDefault(); input[key] = false; };
+        el.addEventListener('touchstart', start, {passive: false});
+        el.addEventListener('touchend', end, {passive: false});
+        el.addEventListener('mousedown', start);
+        el.addEventListener('mouseup', end);
+    };
+    bindBtn('ctrl-L', 'left');
+    bindBtn('ctrl-R', 'right');
+    bindBtn('ctrl-J', 'up');
 
-    canvas.addEventListener('touchmove', e => {
-        if(!gameActive) return;
-        const t = e.touches[0];
-        if(!swipeDone && touchStartY - t.clientY > 45) {
-            inputState.ArrowUp = true;
-            swipeDone = true;
-            setTimeout(() => inputState.ArrowUp = false, 100);
-        }
-        handleMovement(t.clientX);
-        e.preventDefault();
-    }, {passive:false});
-
-    canvas.addEventListener('touchend', () => { 
-        inputState.ArrowLeft = false; 
-        inputState.ArrowRight = false; 
-    });
-
-    function handleMovement(clientX) {
-        if(clientX < gameW/2) { inputState.ArrowLeft = true; inputState.ArrowRight = false; }
-        else { inputState.ArrowRight = true; inputState.ArrowLeft = false; }
-    }
-
-    window.getCurrentDiff = function() { return currentDifficulty; };
-
-    window.startGame = function(diff) {
-        currentDifficulty = diff;
-        const c = gameConfig[diff];
-        player.jumpPower = c.jump;
-        modeDisplay.innerText = diff.toUpperCase();
-        modeDisplay.style.color = c.color;
+    // Spiel-Funktionen
+    window.runGame = (diff) => {
+        window.currentDiff = diff;
+        const s = settings[diff];
+        player.jPower = s.jPower;
+        player.g = s.g;
+        ui.mode.innerText = diff.toUpperCase();
+        ui.mode.style.color = s.color;
         
-        score = 0; frameCount = 0;
-        enemies = []; sideEnemies = []; fxParticles = [];
-        liveScoreEl.innerText = "0";
-        startMenu.style.display = 'none';
-        gameOverMenu.style.display = 'none';
-        gameActive = true;
+        score = 0; frame = 0;
+        enemies = []; sides = []; particles = [];
+        ui.liveScore.innerText = "0";
+        ui.start.style.display = 'none';
+        ui.crash.style.display = 'none';
+        ui.hud.style.display = 'flex';
+        ui.controls.style.display = 'flex';
+        active = true;
         
-        player.x = gameW/2 - player.size/2;
-        player.y = player.groundPos;
+        player.x = cw / 2 - player.size / 2;
+        player.y = player.ground;
         player.vy = 0; player.isJumping = false;
-        player.trail = []; 
+        player.trail = [];
     };
 
-    window.resetToMenu = function() {
-        gameActive = false;
-        gameOverMenu.style.display = 'none';
-        startMenu.style.display = 'flex';
+    window.showHome = () => {
+        active = false;
+        ui.crash.style.display = 'none';
+        ui.hud.style.display = 'none';
+        ui.controls.style.display = 'none';
+        ui.start.style.display = 'flex';
+        updateHSLabel();
     };
 
-    function triggerJump() {
-        if(!player.isJumping && gameActive) {
-            player.vy = player.jumpPower;
+    function jump() {
+        if(!player.isJumping && active) {
+            player.vy = player.jPower;
             player.isJumping = true;
-            createFX(player.x + player.size/2, player.y + player.size, '#38bdf8', 12);
+            createExplosion(player.x + player.size/2, player.y + player.size, '#38bdf8', 10);
         }
     }
 
-    function createEnemy() {
-        let posX = Math.random() * (gameW - 80);
-        let attempts = 0;
-        while(attempts < 5) {
-            let tooNear = enemies.some(e => Math.abs(e.x - posX) < player.size * 2 && e.y < 150);
-            if(!tooNear) break;
-            posX = Math.random() * (gameW - 80);
-            attempts++;
+    function createExplosion(x, y, col, n) {
+        for(let i=0; i<n; i++) {
+            particles.push({x, y, vx:(Math.random()-0.5)*12, vy:(Math.random()-0.5)*12, life:1, col});
         }
+    }
 
-        const baseSize = 30 + Math.random() * 20;
-        let evoLevel = 1;
-        if(score > 150) evoLevel = 3; else if(score > 50) evoLevel = 2;
+    function spawnE() {
+        let px = Math.random() * (cw - 80);
+        let evo = 1;
+        if(score > 120) evo = 3; else if(score > 40) evo = 2;
 
         enemies.push({
-            x: posX, y: -100, size: baseSize,
-            speed: 4.8 + (score / 35),
-            rotation: 0, rotSpeed: (Math.random() - 0.5) * 0.1,
-            evolution: evoLevel,
-            type: Math.random() > 0.5 ? 'rect' : 'circle'
+            x: px, y: -100, size: 28 + Math.random()*20,
+            speed: 3.8 + (score / 45),
+            rot: 0, rotS: (Math.random()-0.5)*0.1,
+            evo, type: Math.random() > 0.5 ? 'rect' : 'circle'
         });
     }
 
-    function createSideEnemy() {
+    function spawnS() {
         const fromLeft = Math.random() > 0.5;
-        sideEnemies.push({
-            x: fromLeft ? -60 : gameW + 60,
-            y: player.groundPos + (player.size - 38),
-            size: 38,
-            speed: fromLeft ? (5.8 + score/38) : -(5.8 + score/38),
-            color: gameConfig[currentDifficulty].color
+        sides.push({
+            x: fromLeft ? -60 : cw + 60,
+            y: player.ground + (player.size - 32),
+            size: 32,
+            speed: fromLeft ? (6.5 + score/35) : -(6.5 + score/35),
+            color: settings[window.currentDiff].color
         });
-    }
-
-    function createFX(x, y, col, count) {
-        for(let i=0; i<count; i++) {
-            fxParticles.push({
-                x, y, 
-                vx: (Math.random()-0.5)*12, 
-                vy: (Math.random()-0.5)*12, 
-                life: 1.0, col
-            });
-        }
     }
 
     function update() {
-        if(!gameActive) return;
+        if(!active) return;
 
-        if(inputState.ArrowLeft) player.x -= player.speed;
-        if(inputState.ArrowRight) player.x += player.speed;
-        if(inputState.ArrowUp) triggerJump();
+        if(input.left) player.x -= player.speed;
+        if(input.right) player.x += player.speed;
+        if(input.up) jump();
 
-        player.x = Math.max(0, Math.min(gameW - player.size, player.x));
-        player.vy += player.grav;
+        player.x = Math.max(0, Math.min(cw - player.size, player.x));
+        player.vy += player.g;
         player.y += player.vy;
         
-        if(player.y >= player.groundPos) {
-            player.y = player.groundPos;
+        if(player.y >= player.ground) {
+            player.y = player.ground;
             player.vy = 0;
             player.isJumping = false;
         }
 
         player.trail.push({x: player.x, y: player.y});
-        if(player.trail.length > 7) player.trail.shift();
+        if(player.trail.length > 8) player.trail.shift();
 
-        frameCount++;
-        const c = gameConfig[currentDifficulty];
-        if(frameCount % c.rate === 0) createEnemy();
-        if(frameCount % c.sideRate === 0) createSideEnemy();
+        frame++;
+        const s = settings[window.currentDiff];
+        if(frame % s.spawn === 0) spawnE();
+        if(frame % s.side === 0) spawnS();
 
-        for(let i = enemies.length-1; i >= 0; i--) {
-            const e = enemies[i];
-            e.y += e.speed; e.rotation += e.rotSpeed;
-            if(detectCollision(player, e)) handleCrash();
-            if(e.y > gameH + 100) { enemies.splice(i, 1); score++; liveScoreEl.innerText = score; }
-        }
+        enemies.forEach((e, i) => {
+            e.y += e.speed; e.rot += e.rotS;
+            if(collision(player, e)) crash();
+            if(e.y > ch + 100) { enemies.splice(i, 1); score++; ui.liveScore.innerText = score; }
+        });
 
-        for(let i = sideEnemies.length-1; i >= 0; i--) {
-            const e = sideEnemies[i];
+        sides.forEach((e, i) => {
             e.x += e.speed;
-            if(detectCollision(player, e)) handleCrash();
-            if(e.x < -150 || e.x > gameW + 150) sideEnemies.splice(i, 1);
-        }
+            if(collision(player, e)) crash();
+            if(e.x < -150 || e.x > cw + 150) sides.splice(i, 1);
+        });
 
-        for(let i = fxParticles.length-1; i >= 0; i--) {
-            const p = fxParticles[i];
-            p.x += p.vx; p.y += p.vy; p.life -= 0.03;
-            if(p.life <= 0) fxParticles.splice(i, 1);
-        }
+        particles.forEach((p, i) => {
+            p.x += p.vx; p.y += p.vy; p.life -= 0.04;
+            if(p.life <= 0) particles.splice(i, 1);
+        });
     }
 
-    function detectCollision(p, o) {
-        let collisionBounds = o.size;
-        if(o.evolution === 2) collisionBounds *= 1.45;
-        if(o.evolution === 3) collisionBounds *= 1.85;
-        
-        const padding = 6;
-        const ox = o.x + o.size/2 - collisionBounds/2;
-        const oy = o.y + o.size/2 - collisionBounds/2;
-
-        return p.x + padding < ox + collisionBounds && 
-               p.x + p.size - padding > ox &&
-               p.y + padding < oy + collisionBounds && 
-               p.y + p.size - padding > oy;
+    function collision(p, o) {
+        let b = o.size;
+        if(o.evo === 2) b *= 1.45;
+        if(o.evo === 3) b *= 1.85;
+        const ox = o.x + o.size/2 - b/2;
+        const oy = o.y + o.size/2 - b/2;
+        const pad = 6;
+        return p.x + pad < ox + b && p.x + p.size - pad > ox &&
+               p.y + pad < oy + b && p.y + p.size - pad > oy;
     }
 
-    function handleCrash() {
-        gameActive = false;
-        createFX(player.x + player.size/2, player.y + player.size/2, '#ef4444', 40);
-        gameOverMenu.style.display = 'flex';
-        finalScoreEl.innerText = score;
+    function crash() {
+        active = false;
+        createExplosion(player.x + player.size/2, player.y + player.size/2, '#ef4444', 35);
+        ui.finalScore.innerText = score;
+        ui.hud.style.display = 'none';
+        ui.controls.style.display = 'none';
+        ui.crash.style.display = 'flex';
+        setHS(score);
     }
 
     function draw() {
-        ctx.clearRect(0, 0, gameW, gameH);
+        ctx.clearRect(0, 0, cw, ch);
         
-        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.moveTo(0, player.groundPos + player.size); ctx.lineTo(gameW, player.groundPos + player.size); ctx.stroke();
+        // Bodenlinie im Canvas
+        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0, player.ground + player.size); ctx.lineTo(cw, player.ground + player.size); ctx.stroke();
 
-        fxParticles.forEach(p => {
+        // Partikel zeichnen
+        particles.forEach(p => {
             ctx.globalAlpha = p.life; ctx.fillStyle = p.col;
-            ctx.fillRect(p.x, p.y, 4, 4);
+            ctx.fillRect(p.x, p.y, 3, 3);
         });
         ctx.globalAlpha = 1;
 
+        // Hindernisse zeichnen (Canvas Evolution)
         enemies.forEach(e => {
             ctx.save();
             ctx.translate(e.x + e.size/2, e.y + e.size/2);
-            ctx.rotate(e.rotation);
+            ctx.rotate(e.rot);
             ctx.fillStyle = '#475569';
-            
             if(e.type === 'rect') ctx.fillRect(-e.size/2, -e.size/2, e.size, e.size);
             else { ctx.beginPath(); ctx.arc(0,0, e.size/2, 0, Math.PI*2); ctx.fill(); }
 
-            if(e.evolution >= 2) {
+            if(e.evo >= 2) {
                 ctx.fillStyle = '#334155';
-                const modSize = e.size * 0.45;
-                ctx.fillRect(-e.size/2 - modSize, -modSize/2, modSize, modSize);
-                ctx.fillRect(e.size/2, -modSize/2, modSize, modSize);
-                ctx.fillRect(-modSize/2, -e.size/2 - modSize, modSize, modSize);
-                ctx.fillRect(-modSize/2, e.size/2, modSize, modSize);
+                const s = e.size * 0.45;
+                ctx.fillRect(-e.size/2 - s, -s/2, s, s);
+                ctx.fillRect(e.size/2, -s/2, s, s);
+                ctx.fillRect(-s/2, -e.size/2 - s, s, s);
+                ctx.fillRect(-s/2, e.size/2, s, s);
             }
-
-            if(e.evolution >= 3) {
-                ctx.strokeStyle = '#64748b'; ctx.lineWidth = 3;
-                ctx.beginPath(); ctx.arc(0, 0, e.size * 1.35, 0, Math.PI*2); ctx.stroke();
+            if(e.evo >= 3) {
+                ctx.strokeStyle = '#64748b'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(0, 0, e.size * 1.3, 0, Math.PI*2); ctx.stroke();
                 ctx.fillStyle = '#1e293b';
-                ctx.fillRect(-e.size*1.65, -3, e.size*3.3, 6);
-                ctx.fillRect(-3, -e.size*1.65, 6, e.size*3.3);
+                ctx.fillRect(-e.size*1.6, -2, e.size*3.2, 4);
+                ctx.fillRect(-2, -e.size*1.6, 4, e.size*3.2);
             }
             ctx.restore();
         });
 
-        sideEnemies.forEach(e => {
+        // Boden-Feinde zeichnen
+        sides.forEach(e => {
             ctx.fillStyle = e.color;
-            ctx.shadowBlur = 15; ctx.shadowColor = e.color;
+            ctx.shadowBlur = 12; ctx.shadowColor = e.color;
             ctx.fillRect(e.x, e.y, e.size, e.size);
             ctx.shadowBlur = 0;
         });
 
-        const trailLen = player.trail.length;
+        // Trail & Spieler zeichnen
+        const tLen = player.trail.length;
         player.trail.forEach((t, i) => {
-            const alphaFactor = trailLen > 0 ? (i / trailLen) : 0;
-            ctx.globalAlpha = alphaFactor * 0.4;
-            ctx.fillStyle = player.color;
+            ctx.globalAlpha = tLen > 0 ? (i / tLen) * 0.35 : 0;
+            ctx.fillStyle = '#38bdf8';
             ctx.fillRect(t.x, t.y, player.size, player.size);
         });
         
         ctx.globalAlpha = 1;
-        ctx.fillStyle = player.color;
-        ctx.shadowBlur = 25; ctx.shadowColor = player.color;
+        ctx.fillStyle = '#38bdf8';
+        ctx.shadowBlur = 15; ctx.shadowColor = '#38bdf8';
         ctx.fillRect(player.x, player.y, player.size, player.size);
         ctx.shadowBlur = 0;
         
+        // Augen
         ctx.fillStyle = '#020617';
-        ctx.fillRect(player.x+10, player.y+12, 6, 6);
-        ctx.fillRect(player.x+26, player.y+12, 6, 6);
+        ctx.fillRect(player.x+8, player.y+10, 5, 5);
+        ctx.fillRect(player.x+player.size-13, player.y+10, 5, 5);
     }
 
-    function animate() {
+    function gameLoop() {
         update();
         draw();
-        requestAnimationFrame(animate);
+        requestAnimationFrame(gameLoop);
     }
-    animate();
-
+    gameLoop();
 })();
 </script>
 </body>
