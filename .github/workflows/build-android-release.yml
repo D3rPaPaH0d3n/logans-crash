@@ -1,0 +1,151 @@
+name: Build Android Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release-Version (z. B. v6.8 oder 6.8)'
+        required: false
+        type: string
+      create_release:
+        description: 'GitHub Release erstellen'
+        required: false
+        default: true
+        type: boolean
+      upload_to_play:
+        description: 'Zur Google Play Console Internal Testing hochladen'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web assets
+        run: npm run build
+
+      - name: Sync Capacitor Android
+        run: npx cap sync android
+
+      - name: Decode Android keystore
+        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+
+      - name: Build signed release AAB
+        if: ${{ secrets.KEYSTORE_BASE64 != '' && secrets.KEYSTORE_PASSWORD != '' && secrets.KEY_ALIAS != '' && secrets.KEY_PASSWORD != '' }}
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          cd android
+          chmod +x ./gradlew
+          ./gradlew bundleRelease \
+            -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/logans-crash/android/app/release.keystore" \
+            -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
+
+      - name: Build unsigned release AAB fallback
+        if: ${{ !(secrets.KEYSTORE_BASE64 != '' && secrets.KEYSTORE_PASSWORD != '' && secrets.KEY_ALIAS != '' && secrets.KEY_PASSWORD != '') }}
+        run: |
+          cd android
+          chmod +x ./gradlew
+          ./gradlew bundleRelease
+
+      - name: Build debug APK
+        run: |
+          cd android
+          chmod +x ./gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload release AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: logans-crash-release-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+
+      - name: Upload debug APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: logans-crash-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      - name: Normalize release version
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.version != ''
+        run: |
+          VERSION='${{ github.event.inputs.version }}'
+          VERSION="${VERSION#v}"
+          echo "RELEASE_VERSION=v$VERSION" >> "$GITHUB_ENV"
+
+      - name: Create Git tag if missing
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.version != '' && github.event.inputs.create_release == 'true'
+        run: |
+          git fetch --tags
+          if git rev-parse "$RELEASE_VERSION" >/dev/null 2>&1; then
+            echo "Tag $RELEASE_VERSION existiert bereits"
+          else
+            git tag "$RELEASE_VERSION"
+            git push origin "$RELEASE_VERSION"
+          fi
+
+      - name: Create GitHub release
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.version != '' && github.event.inputs.create_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_VERSION }}
+          name: Logan's Geometrie Crash ${{ env.RELEASE_VERSION }}
+          files: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/bundle/release/app-release.aab
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+
+      - name: Decode Google Play service account
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.upload_to_play == 'true' && secrets.PLAY_SERVICE_ACCOUNT_JSON != ''
+        run: |
+          echo '${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}' > "$RUNNER_TEMP/play-service-account.json"
+
+      - name: Upload AAB to Google Play Internal Testing
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.upload_to_play == 'true' && secrets.PLAY_SERVICE_ACCOUNT_JSON != ''
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJson: ${{ runner.temp }}/play-service-account.json
+          packageName: com.logans.geometrycrash
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          track: internal
+          status: completed
