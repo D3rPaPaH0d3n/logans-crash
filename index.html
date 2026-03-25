@@ -50,7 +50,7 @@
     <div id="ui-layer" class="ui-layer">
         <div id="menu-start" class="menu-box">
             <h1 class="text-3xl md:text-5xl font-game font-black mb-1 italic uppercase tracking-tighter text-center">LOGAN'S <span class="text-sky-500">GEOMETRIE</span> CRASH</h1>
-            <p class="text-slate-500 mb-4 text-xs tracking-widest uppercase font-bold text-center">Haptic Edition v6.5</p>
+            <p class="text-slate-500 mb-4 text-xs tracking-widest uppercase font-bold text-center">Haptic Edition v6.6</p>
             <div class="coin-display flex items-center gap-2 mb-6 px-5 py-2 rounded-full"><span class="text-2xl">⚽</span><span class="text-xl font-game font-bold text-amber-400" id="menu-coins">0</span></div>
             <div class="flex flex-row flex-wrap justify-center">
                 <div class="flex flex-col items-center"><button class="btn-menu bg-emerald-500 text-white font-game" onclick="window.gameControl.start('leicht')">Leicht</button><span class="text-xs text-emerald-400 uppercase font-bold" id="hs-leicht">Best: 0</span></div>
@@ -92,7 +92,7 @@
         <div class="hud-box coin-display"><div class="text-xs text-amber-400 uppercase font-black">⚽</div><div class="text-lg font-bold font-game leading-tight text-amber-400" id="live-coins">0</div></div>
         <div class="hud-box text-right"><div class="text-xs text-slate-400 uppercase font-black">Best (<span id="hud-mode-name">-</span>)</div><div class="text-xl font-bold font-game leading-tight" id="hud-best">0</div></div>
     </div>
-    <div id="powerup-display" class="fixed bottom-32 left-1/2 transform -translate-x-1/2 z-[130] pointer-events-none text-3xl" style="display:none"></div>
+    <div id="powerup-display" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[130] pointer-events-none text-3xl" style="display:none;opacity:0.72"></div>
     <canvas id="powerupCanvas" class="fixed z-[131] pointer-events-none" width="90" height="90" style="display:none;left:50%;transform:translateX(-50%);"></canvas>
     <div id="controls" class="controls-container" style="display:none">
         <div class="flex space-x-10"><div id="btn-L" class="ctrl-btn btn-arrow"><span style="font-size:2rem;color:rgba(56,189,248,0.3)">&#8592;</span></div><div id="btn-R" class="ctrl-btn btn-arrow"><span style="font-size:2rem;color:rgba(56,189,248,0.3)">&#8594;</span></div></div>
@@ -280,7 +280,7 @@ const style=document.createElement('style');style.innerHTML='@keyframes comboPop
 function triggerJump(){if(!player.jumping&&active){player.vy=player.jP;player.jumping=true;jumpClearedCount=0;clearedEnemiesThisJump=[];const jumpApex=player.ground+player.vy*(Math.abs(player.vy)/player.g)*0.7;enemies.forEach(e=>{const hDist=Math.abs((e.x+e.size/2)-(player.x+player.size/2));if(hDist<player.size+e.size&&e.y>jumpApex&&e.y<player.ground+player.size){e.markedForCombo=true}});sound.jump();haptics.jump();spawnFX(player.x+player.size/2,player.y+player.size,'#38bdf8',10,1);const now=Date.now();if(now-lastJumpTime>=COMBO_WINDOW||comboCount===0)comboCount=1;lastJumpTime=now}}
 
 function spawnFX(x,y,col,n,force){for(let i=0;i<n;i++)fx.push({x,y,vx:(Math.random()-0.5)*12*force,vy:(Math.random()-0.5)*12*force,l:1.0,col})}
-function spawnCoinFX(x,y){const colors=['#fbbf24','#f59e0b','#fcd34d'];for(let i=0;i<15;i++)fx.push({x,y,vx:(Math.random()-0.5)*15,vy:(Math.random()-1)*10,l:1.2,col:colors[Math.floor(Math.random()*colors.length)]});fx.push({x,y:-20,vx:0,vy:-2,l:2,col:'#fbbf24',text:'+1',isText:true})}
+function spawnCoinFX(x,y){const colors=['#fbbf24','#f59e0b','#fcd34d'];for(let i=0;i<15;i++)fx.push({x,y,vx:(Math.random()-0.5)*15,vy:(Math.random()-1)*10,l:1.2,col:colors[Math.floor(Math.random()*colors.length)]});fx.push({x,y:-20,vx:0,vy:-2,l:2,col:'#fbbf24',text:'+⚽',isText:true})}
 function spawnPowerupFX(x,y,type){const colors={shield:['#fbbf24','#f59e0b'],magnet:['#ef4444','#f87171'],slowmo:['#06b6d4','#38bdf8']};const c=colors[type]||['#fff'];for(let i=0;i<20;i++)fx.push({x,y,vx:(Math.random()-0.5)*20,vy:(Math.random()-0.5)*20,l:1.5,col:c[Math.floor(Math.random()*c.length)]})}
 
 function spawnCoin(){const x=Math.random()*(cw-60)+30;coins.push({x,y:-30,size:24,vy:3,speed:3.5,rot:0,rotS:0.05})}
@@ -340,7 +340,7 @@ function drawPlayerPattern(px,py,size,skin,glowColor){
 }
 function getTrailColor(){const trail=getEquippedTrailData();return trail.color==='rainbow'?getRainbowColor():trail.color}
 
-function activatePowerup(type){activePowerup=type;powerupEndTime=Date.now()+7000;sound.powerup();haptics.powerup();const meta=getPowerupMeta(type);ui.powerupDisplay.style.display='block';ui.powerupDisplay.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:'+meta.color+'"><div style="font-size:2.2rem;line-height:1">'+meta.icon+'</div><div style="font-family:Orbitron,sans-serif;font-size:12px;font-weight:900;letter-spacing:1px;text-transform:uppercase">'+meta.label+'</div><div style="font-size:10px;color:#cbd5e1">'+meta.hint+'</div></div>';const pc=document.getElementById('powerupCanvas');if(pc){pc.style.display='block';drawPowerupSymbol(pc,type)}}
+function activatePowerup(type){activePowerup=type;powerupEndTime=Date.now()+7000;sound.powerup();haptics.powerup();const meta=getPowerupMeta(type);ui.powerupDisplay.style.display='block';ui.powerupDisplay.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;border-radius:14px;background:rgba(2,6,23,0.28);backdrop-filter:blur(2px);color:'+meta.color+'"><div style="font-size:1.55rem;line-height:1">'+meta.icon+'</div><div style="font-family:Orbitron,sans-serif;font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase">'+meta.label+'</div></div>';const pc=document.getElementById('powerupCanvas');if(pc){pc.style.display='block';drawPowerupSymbol(pc,type)}}
 
 
 
@@ -378,7 +378,7 @@ enemies.forEach(e=>{ctx.save();ctx.translate(e.x+e.size/2,e.y+e.size/2);ctx.rota
 
 sides.forEach(e=>{ctx.save();if(e.isRotating){ctx.translate(e.x+e.size/2,e.y+e.size/2);ctx.rotate(e.rot);ctx.translate(-(e.x+e.size/2),-(e.y+e.size/2))}ctx.fillStyle=e.color;ctx.shadowBlur=12;ctx.shadowColor=e.color;ctx.fillRect(e.x,e.y,e.size,e.size);ctx.shadowBlur=0;ctx.restore()});
 
-coins.forEach(c=>{ctx.save();ctx.translate(c.x+c.size/2,c.y+c.size/2);ctx.rotate(c.rot);ctx.fillStyle='#fbbf24';ctx.shadowBlur=10;ctx.shadowColor='#fbbf24';ctx.beginPath();ctx.arc(0,0,c.size/2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f59e0b';ctx.beginPath();ctx.arc(0,0,7,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#fcd34d';ctx.lineWidth=1.5;ctx.stroke();ctx.shadowBlur=0;ctx.restore()});
+coins.forEach(c=>{ctx.save();ctx.translate(c.x+c.size/2,c.y+c.size/2);ctx.rotate(c.rot);ctx.shadowBlur=10;ctx.shadowColor='#fbbf24';ctx.font='900 24px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#ffffff';ctx.strokeStyle='#f59e0b';ctx.lineWidth=2;ctx.strokeText('⚽',0,1);ctx.fillText('⚽',0,1);ctx.shadowBlur=0;ctx.restore()});
 
 powerups.forEach(p=>{ctx.save();ctx.translate(p.x+p.size/2,p.y+p.size/2);ctx.rotate(p.rot);const glow=0.5+Math.sin(p.glow)*0.3;ctx.shadowBlur=20*glow;const colors={shield:'#fbbf24',magnet:'#ef4444',slowmo:'#06b6d4'};const c=colors[p.type]||'#fff';ctx.shadowColor=c;ctx.strokeStyle=c;ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,p.size/2,0,Math.PI*2);ctx.stroke();ctx.fillStyle=c;if(p.type==='shield'){ctx.fillRect(-6,-6,12,12)}else if(p.type==='magnet'){ctx.beginPath();ctx.moveTo(0,-8);ctx.lineTo(8,4);ctx.lineTo(-8,4);ctx.closePath();ctx.fill()}else{ctx.beginPath();ctx.arc(0,0,6,0,Math.PI*2);ctx.fill()}ctx.shadowBlur=0;ctx.restore()});
 
