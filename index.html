@@ -29,6 +29,7 @@
         .btn-menu{width:220px;padding:18px;margin:10px;border-radius:12px;font-weight:900;text-transform:uppercase;letter-spacing:2px;border:none;box-shadow:0 5px 0 rgba(0,0,0,0.3);cursor:pointer;pointer-events:auto}
         .hud-box{background:rgba(30,41,59,0.3);padding:8px 16px;border-radius:12px;border:1px solid rgba(56,189,248,0.1);backdrop-filter:blur(2px)}
         #fs-toggle{position:fixed;top:15px;right:20px;z-index:200;width:45px;height:45px;background:rgba(30,41,59,0.3);border:1px solid rgba(56,189,248,0.1);border-radius:8px;color:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer}
+        body.native-app #fs-toggle{display:none!important}
         .shop-item{background:rgba(30,41,59,0.5);border:2px solid rgba(56,189,248,0.2);border-radius:16px;padding:12px;cursor:pointer;transition:all .2s;min-width:80px;text-align:center}
         .shop-item:hover{border-color:rgba(56,189,248,0.5);transform:scale(1.03)}
         .shop-item.owned{border-color:#10b981;background:rgba(16,185,129,0.1)}
@@ -101,6 +102,8 @@
     <canvas id="gameCanvas"></canvas>
 <script>
 (function(){
+const isNativeApp=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+if(isNativeApp)document.body.classList.add('native-app');
 const canvas=document.getElementById('gameCanvas');
 const ctx=canvas.getContext('2d');
 const HS_PREFIX='logans_crash_hs_v50_';
