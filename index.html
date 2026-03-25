@@ -106,7 +106,15 @@ const SKINS=[
 {id:'gold',name:'Gold Spieler',color:'#fbbf24',shape:'square',price:15},
 {id:'rainbow',name:'Regenbogen',color:'rainbow',shape:'square',price:30},
 {id:'diamond',name:'Diamant',color:'#06b6d4',shape:'diamond',price:25},
-{id:'star',name:'Star',color:'#f472b6',shape:'star',price:40}
+{id:'star',name:'Star',color:'#f472b6',shape:'star',price:40},
+{id:'austria',name:'🇦🇹 Österreich',color:'#ed2939',color2:'#fff',pattern:'h3stripe',price:20},
+{id:'brazil',name:'🇧🇷 Brasilien',color:'#fcd34d',color2:'#16a34a',pattern:'hstripe',price:20},
+{id:'argentina',name:'🇦🇷 Argentinien',color:'#7dd3fc',color2:'#fff',pattern:'vstripe',price:20},
+{id:'germany',name:'🇩🇪 Deutschland',color:'#fafafa',color2:'#1e293b',pattern:'solid_accent',price:20},
+{id:'spain',name:'🇪🇸 Spanien',color:'#dc2626',color2:'#fbbf24',pattern:'hstripe',price:20},
+{id:'france',name:'🇫🇷 Frankreich',color:'#3b82f6',color2:'#fff',pattern:'vstripe',price:20},
+{id:'italy',name:'🇮🇹 Italien',color:'#16a34a',color2:'#dc2626',pattern:'topstripe',price:20},
+{id:'england',name:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',color:'#fafafa',color2:'#1e3a5f',pattern:'vstripe',price:20}
 ];
 const TRAILS=[
 {id:'default',name:'Standard',color:'#38bdf8',price:0},
@@ -167,7 +175,22 @@ skinsContainer.innerHTML='';
 SKINS.forEach(skin=>{
 const isOwned=ownedSkins.includes(skin.id),isEquipped=equippedSkin===skin.id;
 const canAfford=coins>=skin.price;
-const bgStyle=skin.color==='rainbow'?'background:conic-gradient(red,yellow,lime,aqua,blue,magenta,red)':'background:'+skin.color;
+let bgStyle;
+if(skin.color==='rainbow'){
+  bgStyle='background:conic-gradient(red,yellow,lime,aqua,blue,magenta,red)';
+}else if(skin.pattern==='hstripe'){
+  bgStyle='background:linear-gradient(to bottom,'+skin.color+' 50%,'+(skin.color2||skin.color)+' 50%)';
+}else if(skin.pattern==='vstripe'){
+  bgStyle='background:linear-gradient(to right,'+skin.color+' 50%,'+(skin.color2||skin.color)+' 50%)';
+}else if(skin.pattern==='h3stripe'){
+  bgStyle='background:linear-gradient(to bottom,'+skin.color+' 33%,'+(skin.color2||'#fff')+' 33%,'+(skin.color2||'#fff')+' 66%,'+skin.color+' 66%)';
+}else if(skin.pattern==='topstripe'){
+  bgStyle='background:linear-gradient(to bottom,'+skin.color+' 50%,'+(skin.color2||'#000')+' 50%)';
+}else if(skin.pattern==='solid_accent'){
+  bgStyle='background:'+skin.color;
+}else{
+  bgStyle='background:'+skin.color;
+}
 const div=document.createElement('div');
 div.className='shop-item '+(isOwned?(isEquipped?'equipped':'owned'):'')+(!isOwned&&!canAfford?' cant-afford':'');
 div.innerHTML='<div class="w-10 h-10 mx-auto rounded-lg mb-2" style="'+bgStyle+'"></div><span class="text-xs font-bold">'+skin.name+'</span>'+(!isOwned?'<span class="text-xs text-amber-400 block">🪙 '+skin.price+'</span>':(isEquipped?'<span class="text-xs text-amber-400">✓</span>':'<span class="text-xs text-emerald-400">Gekauft</span>'));
@@ -234,6 +257,51 @@ function getRainbowColor(){rainbowHue=(rainbowHue+5)%360;return'hsl('+rainbowHue
 function getEquippedSkinData(){const id=getEquippedSkin();return SKINS.find(s=>s.id===id)||SKINS[0]}
 function getEquippedTrailData(){const id=getEquippedTrail();return TRAILS.find(t=>t.id===id)||TRAILS[0]}
 function getPlayerColor(){const skin=getEquippedSkinData();return skin.color==='rainbow'?getRainbowColor():skin.color}
+
+function drawPlayerPattern(px,py,size,skin,glowColor){
+  const s=skin||getEquippedSkinData();
+  const pattern=s.pattern;
+  ctx.shadowBlur=glowColor?25:15;
+  ctx.shadowColor=glowColor||getPlayerColor();
+  if(!pattern||pattern==='solid'){
+    ctx.fillStyle=s.color==='rainbow'?getRainbowColor():s.color;
+    ctx.fillRect(px,py,size,size);
+  }else if(pattern==='hstripe'){
+    const stripeH=size/2;
+    ctx.fillStyle=s.color==='rainbow'?getRainbowColor():s.color;
+    ctx.fillRect(px,py,size,stripeH);
+    ctx.fillStyle=s.color2==='rainbow'?getRainbowColor():(s.color2||s.color);
+    ctx.fillRect(px,py+stripeH,size,stripeH);
+  }else if(pattern==='vstripe'){
+    const stripeW=size/2;
+    ctx.fillStyle=s.color==='rainbow'?getRainbowColor():s.color;
+    ctx.fillRect(px,py,stripeW,size);
+    ctx.fillStyle=s.color2==='rainbow'?getRainbowColor():(s.color2||s.color);
+    ctx.fillRect(px+stripeW,py,stripeW,size);
+  }else if(pattern==='h3stripe'){
+    const h=size/3;
+    ctx.fillStyle=s.color==='rainbow'?getRainbowColor():s.color;
+    ctx.fillRect(px,py,size,h);
+    ctx.fillStyle=s.color2==='rainbow'?getRainbowColor():(s.color2||'#fff');
+    ctx.fillRect(px,py+h,size,h);
+    ctx.fillStyle=s.color==='rainbow'?getRainbowColor():s.color;
+    ctx.fillRect(px,py+2*h,size,h);
+  }else if(pattern==='topstripe'){
+    ctx.fillStyle=s.color==='rainbow'?getRainbowColor():s.color;
+    ctx.fillRect(px,py,size,size/2);
+    ctx.fillStyle=s.color2==='rainbow'?getRainbowColor():(s.color2||'#000');
+    ctx.fillRect(px,py+size/2,size,size/2);
+  }else if(pattern==='solid_accent'){
+    ctx.fillStyle=s.color==='rainbow'?getRainbowColor():s.color;
+    ctx.fillRect(px,py,size,size);
+    ctx.fillStyle=s.color2==='rainbow'?getRainbowColor():(s.color2||'#000');
+    ctx.fillRect(px,py+size-4,size,4);
+  }else{
+    ctx.fillStyle=s.color==='rainbow'?getRainbowColor():s.color;
+    ctx.fillRect(px,py,size,size);
+  }
+  ctx.shadowBlur=0;
+}
 function getTrailColor(){const trail=getEquippedTrailData();return trail.color==='rainbow'?getRainbowColor():trail.color}
 
 function activatePowerup(type){activePowerup=type;powerupEndTime=Date.now()+3000;sound.powerup();haptics.powerup();ui.powerupDisplay.style.display='none';const pc=document.getElementById('powerupCanvas');if(pc){pc.style.display='block';drawPowerupSymbol(pc,type);pc.style.animation='powerupGlow 0.5s infinite alternate'}}
@@ -280,9 +348,7 @@ powerups.forEach(p=>{ctx.save();ctx.translate(p.x+p.size/2,p.y+p.size/2);ctx.rot
 
 const tLen=player.trail.length;const trailColor=getTrailColor();player.trail.forEach((t,i)=>{ctx.globalAlpha=tLen>0?(i/tLen)*0.4:0;ctx.fillStyle=trailColor;ctx.fillRect(t.x,t.y,player.size,player.size)});
 
-ctx.globalAlpha=1;const playerColor=getPlayerColor();ctx.fillStyle=playerColor;if(activePowerup==='shield'){ctx.shadowBlur=25;ctx.shadowColor='#fbbf24'}else{ctx.shadowBlur=15;ctx.shadowColor=playerColor}ctx.fillRect(player.x,player.y,player.size,player.size);ctx.shadowBlur=0;ctx.fillStyle='#020617';ctx.fillRect(player.x+8,player.y+10,5,5);ctx.fillRect(player.x+player.size-13,player.y+10,5,5);
-
-const skin=getEquippedSkinData();if(skin.shape==='diamond'){ctx.save();ctx.translate(player.x+player.size/2,player.y+player.size/2);ctx.rotate(Math.PI/4);ctx.fillStyle='#020617';ctx.fillRect(-player.size/2+8,-player.size/2+10,5,5);ctx.fillRect(player.size/2-13,-player.size/2+10,5,5);ctx.restore()}else if(skin.shape==='star'){ctx.save();ctx.translate(player.x+player.size/2,player.y+player.size/2);ctx.rotate(Date.now()/500);ctx.fillStyle='#020617';ctx.fillRect(-player.size/2+8,-player.size/2+10,5,5);ctx.fillRect(player.size/2-13,-player.size/2+10,5,5);ctx.restore()}
+ctx.globalAlpha=1;const skin=getEquippedSkinData();const glowColor=activePowerup==='shield'?'#fbbf24':null;if(skin.shape==='diamond'){ctx.save();ctx.shadowBlur=glowColor?25:15;ctx.shadowColor=glowColor||getPlayerColor();ctx.translate(player.x+player.size/2,player.y+player.size/2);ctx.rotate(Math.PI/4);ctx.fillStyle=skin.color==='rainbow'?getRainbowColor():skin.color;ctx.fillRect(-player.size/2,-player.size/2,player.size,player.size);ctx.shadowBlur=0;ctx.restore()}else if(skin.shape==='star'){ctx.save();ctx.shadowBlur=glowColor?25:15;ctx.shadowColor=glowColor||getPlayerColor();ctx.translate(player.x+player.size/2,player.y+player.size/2);ctx.rotate(Date.now()/500);ctx.fillStyle=skin.color==='rainbow'?getRainbowColor():skin.color;ctx.fillRect(-player.size/2,-player.size/2,player.size,player.size);ctx.shadowBlur=0;ctx.restore()}else{drawPlayerPattern(player.x,player.y,player.size,skin,glowColor)}ctx.fillStyle='#020617';ctx.fillRect(player.x+8,player.y+10,5,5);ctx.fillRect(player.x+player.size-13,player.y+10,5,5);
 
 ctx.restore()}
 
