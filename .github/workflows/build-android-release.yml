@@ -27,6 +27,9 @@ permissions:
 jobs:
   build-release:
     runs-on: ubuntu-latest
+    env:
+      HAS_SIGNING: ${{ secrets.KEYSTORE_BASE64 != '' && secrets.KEYSTORE_PASSWORD != '' && secrets.KEY_ALIAS != '' && secrets.KEY_PASSWORD != '' }}
+      HAS_PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
 
     steps:
       - name: Checkout
@@ -59,12 +62,12 @@ jobs:
         run: npx cap sync android
 
       - name: Decode Android keystore
-        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        if: ${{ env.HAS_SIGNING == 'true' }}
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
 
       - name: Build signed release AAB
-        if: ${{ secrets.KEYSTORE_BASE64 != '' && secrets.KEYSTORE_PASSWORD != '' && secrets.KEY_ALIAS != '' && secrets.KEY_PASSWORD != '' }}
+        if: ${{ env.HAS_SIGNING == 'true' }}
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -79,7 +82,7 @@ jobs:
             -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
 
       - name: Build unsigned release AAB fallback
-        if: ${{ !(secrets.KEYSTORE_BASE64 != '' && secrets.KEYSTORE_PASSWORD != '' && secrets.KEY_ALIAS != '' && secrets.KEY_PASSWORD != '') }}
+        if: ${{ env.HAS_SIGNING != 'true' }}
         run: |
           cd android
           chmod +x ./gradlew
@@ -136,12 +139,12 @@ jobs:
           fail_on_unmatched_files: true
 
       - name: Decode Google Play service account
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.upload_to_play == 'true' && secrets.PLAY_SERVICE_ACCOUNT_JSON != ''
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.upload_to_play == 'true' && env.HAS_PLAY_JSON == 'true'
         run: |
           echo '${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}' > "$RUNNER_TEMP/play-service-account.json"
 
       - name: Upload AAB to Google Play Internal Testing
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.upload_to_play == 'true' && secrets.PLAY_SERVICE_ACCOUNT_JSON != ''
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.upload_to_play == 'true' && env.HAS_PLAY_JSON == 'true'
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: ${{ runner.temp }}/play-service-account.json
