@@ -50,7 +50,7 @@
     <div id="ui-layer" class="ui-layer">
         <div id="menu-start" class="menu-box">
             <h1 class="text-3xl md:text-5xl font-game font-black mb-1 italic uppercase tracking-tighter text-center">LOGAN'S <span class="text-sky-500">GEOMETRIE</span> CRASH</h1>
-            <p class="text-slate-500 mb-4 text-xs tracking-widest uppercase font-bold text-center">Haptic Edition v6.6</p>
+            <p class="text-slate-500 mb-4 text-xs tracking-widest uppercase font-bold text-center">Haptic Edition v6.7</p>
             <div class="coin-display flex items-center gap-2 mb-6 px-5 py-2 rounded-full"><span class="text-2xl">⚽</span><span class="text-xl font-game font-bold text-amber-400" id="menu-coins">0</span></div>
             <div class="flex flex-row flex-wrap justify-center">
                 <div class="flex flex-col items-center"><button class="btn-menu bg-emerald-500 text-white font-game" onclick="window.gameControl.start('leicht')">Leicht</button><span class="text-xs text-emerald-400 uppercase font-bold" id="hs-leicht">Best: 0</span></div>
@@ -340,7 +340,7 @@ function drawPlayerPattern(px,py,size,skin,glowColor){
 }
 function getTrailColor(){const trail=getEquippedTrailData();return trail.color==='rainbow'?getRainbowColor():trail.color}
 
-function activatePowerup(type){activePowerup=type;powerupEndTime=Date.now()+7000;sound.powerup();haptics.powerup();const meta=getPowerupMeta(type);ui.powerupDisplay.style.display='block';ui.powerupDisplay.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;border-radius:14px;background:rgba(2,6,23,0.28);backdrop-filter:blur(2px);color:'+meta.color+'"><div style="font-size:1.55rem;line-height:1">'+meta.icon+'</div><div style="font-family:Orbitron,sans-serif;font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase">'+meta.label+'</div></div>';const pc=document.getElementById('powerupCanvas');if(pc){pc.style.display='block';drawPowerupSymbol(pc,type)}}
+function activatePowerup(type){activePowerup=type;powerupEndTime=Date.now()+7000;sound.powerup();haptics.powerup();const meta=getPowerupMeta(type);ui.powerupDisplay.style.display='block';ui.powerupDisplay.innerHTML='<div style="display:flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:14px;background:rgba(2,6,23,0.22);backdrop-filter:blur(2px);color:'+meta.color+'"><div style="font-size:1.55rem;line-height:1">'+meta.icon+'</div></div>';const pc=document.getElementById('powerupCanvas');if(pc){pc.style.display='block';drawPowerupSymbol(pc,type)}}
 
 
 
