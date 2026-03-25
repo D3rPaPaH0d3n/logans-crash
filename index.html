@@ -12,6 +12,8 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@400;900&display=swap');
         body{margin:0;padding:0;overflow:hidden;background:#020617;touch-action:none;font-family:'Inter',sans-serif;color:white;user-select:none;-webkit-user-select:none}
+        #menu-shop{justify-content:flex-start;padding-top:max(32px,env(safe-area-inset-top,0px)+20px);padding-bottom:32px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+        #menu-shop .shop-section{width:min(100%,900px)}
         canvas{display:block;position:absolute;top:0;left:0;z-index:10}
         .font-game{font-family:'Orbitron',sans-serif}
         #orientation-msg{display:none;position:fixed;inset:0;background:#020617;z-index:2000;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
@@ -48,7 +50,7 @@
     <div id="ui-layer" class="ui-layer">
         <div id="menu-start" class="menu-box">
             <h1 class="text-3xl md:text-5xl font-game font-black mb-1 italic uppercase tracking-tighter text-center">LOGAN'S <span class="text-sky-500">GEOMETRIE</span> CRASH</h1>
-            <p class="text-slate-500 mb-4 text-xs tracking-widest uppercase font-bold text-center">Haptic Edition v6.3</p>
+            <p class="text-slate-500 mb-4 text-xs tracking-widest uppercase font-bold text-center">Haptic Edition v6.4</p>
             <div class="coin-display flex items-center gap-2 mb-6 px-5 py-2 rounded-full"><span class="text-2xl">🪙</span><span class="text-xl font-game font-bold text-amber-400" id="menu-coins">0</span></div>
             <div class="flex flex-row flex-wrap justify-center">
                 <div class="flex flex-col items-center"><button class="btn-menu bg-emerald-500 text-white font-game" onclick="window.gameControl.start('leicht')">Leicht</button><span class="text-xs text-emerald-400 uppercase font-bold" id="hs-leicht">Best: 0</span></div>
@@ -60,10 +62,18 @@
         <div id="menu-shop" class="menu-box" style="display:none">
             <h2 class="text-3xl font-game font-black text-amber-400 mb-2 italic uppercase">🏪 Logan's Shop</h2>
             <div class="coin-display flex items-center gap-2 mb-6 px-5 py-2 rounded-full"><span class="text-2xl">🪙</span><span class="text-xl font-game font-bold text-amber-400" id="shop-coins">0</span></div>
-            <h3 class="text-base font-game text-sky-400 mb-3">🎨 Spieler-Skins</h3>
-            <div class="flex flex-wrap justify-center gap-2 mb-6 max-w-xl" id="shop-skins"></div>
-            <h3 class="text-base font-game text-sky-400 mb-3">✨ Trail-Effekte</h3>
-            <div class="flex flex-wrap justify-center gap-2 mb-4 max-w-xl" id="shop-trails"></div>
+            <div class="shop-section">
+                <h3 class="text-base font-game text-sky-400 mb-3">🎨 Spieler-Skins</h3>
+                <div class="flex flex-wrap justify-center gap-2 mb-6" id="shop-skins"></div>
+            </div>
+            <div class="shop-section">
+                <h3 class="text-base font-game text-sky-400 mb-3">🌈 Farb-Trails</h3>
+                <div class="flex flex-wrap justify-center gap-2 mb-6" id="shop-trails"></div>
+            </div>
+            <div class="shop-section">
+                <h3 class="text-base font-game text-sky-400 mb-3">✨ Spezial-Trails</h3>
+                <div class="flex flex-wrap justify-center gap-2 mb-4" id="shop-special-trails"></div>
+            </div>
             <button class="btn-menu bg-sky-600 text-white font-game shadow-none mt-4" onclick="window.gameControl.home()">Zurück</button>
         </div>
         <div id="menu-crash" class="menu-box" style="display:none">
@@ -176,6 +186,8 @@ function unlockTrail(id){const o=getOwnedTrails();if(!o.includes(id)){o.push(id)
 function svgBadgeCheck(){return'<svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="11" fill="#10b981"/><polyline points="6,11 10,15 16,7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>'}
 function svgBadgeStar(){return'<svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="11" fill="#fbbf24"/><polygon points="11,3 13.1,8.5 19,8.5 14.3,12.2 16.1,18 11,14.3 5.9,18 7.7,12.2 3,8.5 8.9,8.5" fill="#020617"/></svg>'}
 function svgBadgeLock(){return'<svg width="22" height="22" viewBox="0 0 22 22"><rect x="3" y="9" width="16" height="11" rx="2" fill="rgba(100,116,139,0.9)"/><path d="M7 9V7a4 4 0 0 1 8 0v2" stroke="rgba(100,116,139,0.9)" stroke-width="2" fill="none" stroke-linecap="round"/></svg>'}
+function getPowerupMeta(type){const meta={shield:{label:'Schild',icon:'🛡️',hint:'Schützt vor 1 Treffer',color:'#fbbf24'},magnet:{label:'Magnet',icon:'🧲',hint:'Zieht Münzen an',color:'#ef4444'},slowmo:{label:'Zeitlupe',icon:'⏱️',hint:'Verlangsamt Gegner',color:'#06b6d4'}};return meta[type]||{label:type,icon:'?',hint:'',color:'#fff'}}
+function getTrailPreview(trail){if(trail.type==='stardust')return '<div class="text-xl mb-1">✨</div>';if(trail.type==='bubbles')return '<div class="text-xl mb-1">🫧</div>';if(trail.type==='sparks')return '<div class="text-xl mb-1">⚡</div>';if(trail.type==='lightning')return '<div class="text-xl mb-1">🌩️</div>';if(trail.type==='hearts')return '<div class="text-xl mb-1">💖</div>';const bgStyle=trail.color==='rainbow'?'background:conic-gradient(red,yellow,lime,aqua,blue,magenta,red)':'background:'+trail.color;return '<div class="w-14 h-3 mx-auto rounded-full mb-2" style="'+bgStyle+'"></div>'}
 function renderShop(){
 const coins=getCoins();
 ui.menuCoins.innerText=coins;ui.shopCoins.innerText=coins;
@@ -213,11 +225,12 @@ div.innerHTML='<div class="w-10 h-10 mx-auto rounded-lg mb-2" style="'+bgStyle+'
 div.onclick=()=>{if(isOwned){setEquippedSkin(skin.id);sound.equip();renderShop()}else if(canAfford&&spendCoins(skin.price)){unlockSkin(skin.id);setEquippedSkin(skin.id);sound.purchase();renderShop()}};
 skinsContainer.appendChild(div)});
 const trailsContainer=document.getElementById('shop-trails');
+const specialTrailsContainer=document.getElementById('shop-special-trails');
 trailsContainer.innerHTML='';
+specialTrailsContainer.innerHTML='';
 TRAILS.forEach(trail=>{
 const isOwned=ownedTrails.includes(trail.id),isEquipped=equippedTrail===trail.id;
 const canAfford=coins>=trail.price;
-const bgStyle=trail.color==='rainbow'?'background:conic-gradient(red,yellow,lime,aqua,blue,magenta,red)':'background:'+trail.color;
 const div=document.createElement('div');
 let badge='';
 if(isEquipped){badge=svgBadgeStar();}
@@ -225,9 +238,9 @@ else if(isOwned){badge=svgBadgeCheck();}
 else if(!canAfford){badge=svgBadgeLock();}
 const priceTag=!isOwned?'<span class="text-xs text-amber-400 block">$ '+trail.price+'</span>':'';
 div.className='shop-item '+(isOwned?(isEquipped?'equipped':'owned'):'')+(!isOwned&&!canAfford?' cant-afford':'');
-div.innerHTML='<div class="w-14 h-3 mx-auto rounded-full mb-2" style="'+bgStyle+'"></div><span class="text-xs font-bold">'+trail.name+'</span>'+priceTag+'<div class="badge">'+badge+'</div>';
+div.innerHTML=getTrailPreview(trail)+'<span class="text-xs font-bold block">'+trail.name+'</span>'+priceTag+'<div class="badge">'+badge+'</div>';
 div.onclick=()=>{if(isOwned){setEquippedTrail(trail.id);sound.equip();renderShop()}else if(canAfford&&spendCoins(trail.price)){unlockTrail(trail.id);setEquippedTrail(trail.id);sound.purchase();renderShop()}};
-trailsContainer.appendChild(div)})}
+(trail.type?specialTrailsContainer:trailsContainer).appendChild(div)})}
 
 function initStars(){stars=[];for(let i=0;i<80;i++)stars.push({x:Math.random()*cw,y:Math.random()*ch,size:Math.random()*2+0.5,speed:Math.random()*0.5+0.1,twinkle:Math.random()*Math.PI*2})}
 function updateStars(dt){stars.forEach(s=>{s.x-=s.speed*dt;s.twinkle+=0.05*dt;if(s.x<-5){s.x=cw+5;s.y=Math.random()*ch}})}
@@ -327,13 +340,13 @@ function drawPlayerPattern(px,py,size,skin,glowColor){
 }
 function getTrailColor(){const trail=getEquippedTrailData();return trail.color==='rainbow'?getRainbowColor():trail.color}
 
-function activatePowerup(type){activePowerup=type;powerupEndTime=Date.now()+7000;sound.powerup();haptics.powerup();const pc=document.getElementById('powerupCanvas');if(pc){pc.style.display='block';drawPowerupSymbol(pc,type)}}
+function activatePowerup(type){activePowerup=type;powerupEndTime=Date.now()+7000;sound.powerup();haptics.powerup();const meta=getPowerupMeta(type);ui.powerupDisplay.style.display='block';ui.powerupDisplay.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:'+meta.color+'"><div style="font-size:2.2rem;line-height:1">'+meta.icon+'</div><div style="font-family:Orbitron,sans-serif;font-size:12px;font-weight:900;letter-spacing:1px;text-transform:uppercase">'+meta.label+'</div><div style="font-size:10px;color:#cbd5e1">'+meta.hint+'</div></div>';const pc=document.getElementById('powerupCanvas');if(pc){pc.style.display='block';drawPowerupSymbol(pc,type)}}
 
 
 
 function drawPowerupSymbol(canvas,type){const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);const cx=canvas.width/2,cy=canvas.height/2;const colors={shield:'#fbbf24',magnet:'#ef4444',slowmo:'#06b6d4'};const color=colors[type]||'#fff';const remaining=Math.max(0,powerupEndTime-Date.now());const progress=remaining/7000;const blink=remaining<=2000&&Math.floor(Date.now()/200)%2===0;ctx.globalAlpha=blink?0.3:1;ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=5;ctx.beginPath();ctx.arc(cx,cy,36,0,Math.PI*2);ctx.stroke();ctx.strokeStyle=color;ctx.lineWidth=5;ctx.lineCap='round';ctx.shadowBlur=10;ctx.shadowColor=color;ctx.beginPath();ctx.arc(cx,cy,36,-Math.PI/2,-Math.PI/2+progress*Math.PI*2,false);ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle=color;ctx.shadowBlur=12;ctx.shadowColor=color;if(type==='shield'){ctx.fillRect(cx-8,cy-8,16,16)}else if(type==='magnet'){ctx.beginPath();ctx.moveTo(cx-10,cy-8);ctx.lineTo(cx-4,cy+10);ctx.lineTo(cx+4,cy+10);ctx.lineTo(cx+10,cy-8);ctx.closePath();ctx.fill();ctx.beginPath();ctx.arc(cx-7,cy-8,4,Math.PI,0);ctx.stroke();ctx.beginPath();ctx.arc(cx+7,cy-8,4,Math.PI,0);ctx.stroke()}else if(type==='slowmo'){ctx.font='bold 20px Orbitron,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('>>',cx,cy+1)}ctx.shadowBlur=0;ctx.globalAlpha=1}
 
-function update(dt){if(!active)return;const s=settings[window.currentDiff];const timeScale=activePowerup==='slowmo'?0.4:1;const scaledDt=dt*timeScale;if(firstSpawn){spawnEnemy();spawnCoin();spawnPowerup();spawnSide();firstSpawn=false;spawnAccumulator=0;sideAccumulator=0;powerupAccumulator=0;coinAccumulator=0}if(activePowerup&&Date.now()>powerupEndTime){activePowerup=null;const pc=document.getElementById('powerupCanvas');if(pc)pc.style.display='none'}if(activePowerup){const pc=document.getElementById('powerupCanvas');if(pc){pc.style.display='block';pc.style.bottom=(ch-player.ground+30)+'px'}drawPowerupSymbol(pc,activePowerup)}if(input.L)player.x-=player.speed*scaledDt;if(input.R)player.x+=player.speed*scaledDt;player.x=Math.max(0,Math.min(cw-player.size,player.x));player.vy+=player.g*scaledDt;player.y+=player.vy*scaledDt;player.trail.push({x:player.x,y:player.y});if(player.trail.length>10)player.trail.shift();const eqTrail=getEquippedTrailData();if(eqTrail.type&&Math.random()<0.4){if(eqTrail.type==='stardust'){trailParticles.push({x:player.x+player.size/2+(Math.random()-0.5)*20,y:player.y+player.size/2+(Math.random()-0.5)*20,vx:(Math.random()-0.5)*1,vy:(Math.random()-0.5)*1,l:1.0,col:eqTrail.color,sz:2})}else if(eqTrail.type==='bubbles'){trailParticles.push({x:player.x+player.size/2+(Math.random()-0.5)*15,y:player.y+player.size/2,vx:(Math.random()-0.5)*0.5,vy:-1.5,l:1.2,col:eqTrail.color,sz:4+Math.random()*4})}else if(eqTrail.type==='sparks'){trailParticles.push({x:player.x+player.size/2+(Math.random()-0.5)*10,y:player.y,vx:(Math.random()-0.5)*2,vy:2+Math.random()*2,l:0.8,col:eqTrail.color,sz:2})}else if(eqTrail.type==='lightning'){trailParticles.push({x:player.x+player.size/2,y:player.y+player.size/2,vx:(Math.random()-0.5)*3,vy:(Math.random()-0.5)*3,l:0.5,col:eqTrail.color,sz:2})}else if(eqTrail.type==='hearts'){trailParticles.push({x:player.x+player.size/2+(Math.random()-0.5)*15,y:player.y+player.size/2,vx:(Math.random()-0.5)*1,vy:-1,l:1.0,col:eqTrail.color,sz:6})}}trailParticles=trailParticles.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.l-=0.025;return p.l>0});const msPerFrame=dt*16.66;spawnAccumulator+=msPerFrame;sideAccumulator+=msPerFrame;powerupAccumulator+=msPerFrame;coinAccumulator+=msPerFrame;if(spawnAccumulator>=s.spawnMs){spawnEnemy();spawnAccumulator=0}if(sideAccumulator>=s.sideMs){spawnSide();sideAccumulator=0}if(powerupAccumulator>=s.powerupMs){if(Math.random()>0.5)spawnPowerup();powerupAccumulator=0}if(coinAccumulator>=s.coinMs){spawnCoin();coinAccumulator=0}
+function update(dt){if(!active)return;const s=settings[window.currentDiff];const timeScale=activePowerup==='slowmo'?0.4:1;const scaledDt=dt*timeScale;if(firstSpawn){spawnEnemy();spawnCoin();spawnPowerup();spawnSide();firstSpawn=false;spawnAccumulator=0;sideAccumulator=0;powerupAccumulator=0;coinAccumulator=0}if(activePowerup&&Date.now()>powerupEndTime){activePowerup=null;ui.powerupDisplay.style.display='none';const pc=document.getElementById('powerupCanvas');if(pc)pc.style.display='none'}if(activePowerup){const pc=document.getElementById('powerupCanvas');if(pc){pc.style.display='block';pc.style.bottom=(ch-player.ground+30)+'px'}drawPowerupSymbol(pc,activePowerup)}if(input.L)player.x-=player.speed*scaledDt;if(input.R)player.x+=player.speed*scaledDt;player.x=Math.max(0,Math.min(cw-player.size,player.x));player.vy+=player.g*scaledDt;player.y+=player.vy*scaledDt;player.trail.push({x:player.x,y:player.y});if(player.trail.length>10)player.trail.shift();const eqTrail=getEquippedTrailData();if(eqTrail.type&&Math.random()<0.4){if(eqTrail.type==='stardust'){trailParticles.push({x:player.x+player.size/2+(Math.random()-0.5)*20,y:player.y+player.size/2+(Math.random()-0.5)*20,vx:(Math.random()-0.5)*1,vy:(Math.random()-0.5)*1,l:1.0,col:eqTrail.color,sz:2})}else if(eqTrail.type==='bubbles'){trailParticles.push({x:player.x+player.size/2+(Math.random()-0.5)*15,y:player.y+player.size/2,vx:(Math.random()-0.5)*0.5,vy:-1.5,l:1.2,col:eqTrail.color,sz:4+Math.random()*4})}else if(eqTrail.type==='sparks'){trailParticles.push({x:player.x+player.size/2+(Math.random()-0.5)*10,y:player.y,vx:(Math.random()-0.5)*2,vy:2+Math.random()*2,l:0.8,col:eqTrail.color,sz:2})}else if(eqTrail.type==='lightning'){trailParticles.push({x:player.x+player.size/2,y:player.y+player.size/2,vx:(Math.random()-0.5)*3,vy:(Math.random()-0.5)*3,l:0.5,col:eqTrail.color,sz:2})}else if(eqTrail.type==='hearts'){trailParticles.push({x:player.x+player.size/2+(Math.random()-0.5)*15,y:player.y+player.size/2,vx:(Math.random()-0.5)*1,vy:-1,l:1.0,col:eqTrail.color,sz:6})}}trailParticles=trailParticles.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.l-=0.025;return p.l>0});const msPerFrame=dt*16.66;spawnAccumulator+=msPerFrame;sideAccumulator+=msPerFrame;powerupAccumulator+=msPerFrame;coinAccumulator+=msPerFrame;if(spawnAccumulator>=s.spawnMs){spawnEnemy();spawnAccumulator=0}if(sideAccumulator>=s.sideMs){spawnSide();sideAccumulator=0}if(powerupAccumulator>=s.powerupMs){if(Math.random()>0.5)spawnPowerup();powerupAccumulator=0}if(coinAccumulator>=s.coinMs){spawnCoin();coinAccumulator=0}
 
 enemies.forEach((e,i)=>{e.y+=e.speed*scaledDt;e.rot+=e.rotS*scaledDt;if(checkHit(player,e)){if(e.super){score+=5;spawnFirework(e.x+e.size/2,e.y+e.size/2);enemies.splice(i,1);fx.push({x:e.x+e.size/2-10,y:e.y,vx:0,vy:-2,l:1.5,col:'#fbbf24',text:'x5',isText:true})}else if(activePowerup==='shield'){score+=2;spawnShieldBreak(e.x+e.size/2,e.y+e.size/2);enemies.splice(i,1)}else crash()}if(e.y>ch+100){enemies.splice(i,1);if(!e.super){score++;ui.live.innerText=score}}if(e.markedForCombo&&!e.cleared&&e.y>player.y+player.size+5&&!checkHit(player,e)){e.cleared=true;clearedEnemiesThisJump.push(e);jumpClearedCount=clearedEnemiesThisJump.length}});
 
@@ -357,7 +370,7 @@ function checkCoinHit(p,c){return p.x<c.x+c.size&&p.x+p.size>c.x&&p.y<c.y+c.size
 
 function drawPolygon(x,y,radius,sides,rotation){ctx.beginPath();for(let i=0;i<sides;i++){const angle=rotation+(i*2*Math.PI)/sides;const px=x+radius*Math.cos(angle);const py=y+radius*Math.sin(angle);if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py)}ctx.closePath();ctx.fill()}
 
-function crash(){active=false;stopMusic();sound.crash();haptics.crash();spawnFX(player.x+player.size/2,player.y+player.size/2,'#ef4444',40,1.5);shakeIntensity=15;const totalCoins=addCoins(sessionCoins);ui.final.innerText=score;ui.sessionCoins.innerText=sessionCoins;ui.hud.style.display='none';ui.controls.style.display='none';ui.crash.style.display='flex';document.getElementById('powerupCanvas').style.display='none';if(saveHS(window.currentDiff,score))ui.newRecord.style.display='block'}
+function crash(){active=false;stopMusic();sound.crash();haptics.crash();spawnFX(player.x+player.size/2,player.y+player.size/2,'#ef4444',40,1.5);shakeIntensity=15;const totalCoins=addCoins(sessionCoins);ui.final.innerText=score;ui.sessionCoins.innerText=sessionCoins;ui.hud.style.display='none';ui.controls.style.display='none';ui.crash.style.display='flex';ui.powerupDisplay.style.display='none';document.getElementById('powerupCanvas').style.display='none';if(saveHS(window.currentDiff,score))ui.newRecord.style.display='block'}
 
 function draw(){ctx.save();if(shakeIntensity>0.5){shakeX=(Math.random()-0.5)*shakeIntensity;shakeY=(Math.random()-0.5)*shakeIntensity;ctx.translate(shakeX,shakeY);shakeIntensity*=0.9}else{shakeIntensity=0;shakeX=0;shakeY=0}ctx.clearRect(-10,-10,cw+20,ch+20);drawStars();ctx.strokeStyle='#1e293b';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,player.ground+player.size);ctx.lineTo(cw,player.ground+player.size);ctx.stroke();fx.forEach(p=>{ctx.globalAlpha=Math.max(0,p.l);ctx.fillStyle=p.col;if(p.isText){ctx.font='900 24px Orbitron';ctx.fillText(p.text,p.x,p.y)}else{ctx.fillRect(p.x,p.y,4,4)}});ctx.globalAlpha=1
 
