@@ -1,10 +1,15 @@
 name: Build Android APK
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release-Version (z. B. v6.8 oder 6.8)'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -16,6 +21,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -53,11 +60,30 @@ jobs:
           name: logans-crash-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
+      - name: Normalize release version
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          VERSION='${{ github.event.inputs.version }}'
+          VERSION="${VERSION#v}"
+          echo "RELEASE_VERSION=v$VERSION" >> "$GITHUB_ENV"
+
+      - name: Create Git tag if missing
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git fetch --tags
+          if git rev-parse "$RELEASE_VERSION" >/dev/null 2>&1; then
+            echo "Tag $RELEASE_VERSION existiert bereits"
+          else
+            git tag "$RELEASE_VERSION"
+            git push origin "$RELEASE_VERSION"
+          fi
+
       - name: Create GitHub release
         if: github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: apk-${{ github.run_number }}
-          name: Logan's Geometrie Crash APK ${{ github.run_number }}
+          tag_name: ${{ env.RELEASE_VERSION }}
+          name: Logan's Geometrie Crash ${{ env.RELEASE_VERSION }}
           files: android/app/build/outputs/apk/debug/app-debug.apk
           generate_release_notes: true
+          fail_on_unmatched_files: true
