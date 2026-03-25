@@ -1,4 +1,4 @@
-package com.loganscrash.game;
+package com.logans.geometrycrash;
 
 import android.os.Build;
 import android.os.Bundle;

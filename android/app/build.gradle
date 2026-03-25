@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.loganscrash.game"
+    namespace = "com.logans.geometrycrash"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.loganscrash.game"
+        applicationId "com.logans.geometrycrash"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
