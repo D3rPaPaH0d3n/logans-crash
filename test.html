@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+    <style>
+        body.native-app #fs-toggle { display: none !important; }
+        #fs-toggle { background: red; color: white; padding: 10px; }
+    </style>
+</head>
+<body>
+    <button id="fs-toggle">Fullscreen Button</button>
+    <script>
+        // Simulate Capacitor loading after a delay
+        setTimeout(() => {
+            window.Capacitor = {
+                isNativePlatform: () => true,
+                getPlatform: () => 'android',
+                Plugins: {}
+            };
+            // Trigger detection
+            const isNativeApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+            if (isNativeApp) {
+                document.body.classList.add('native-app');
+                console.log('Native app detected in test');
+            }
+        }, 100);
+    </script>
+</body>
+</html>
