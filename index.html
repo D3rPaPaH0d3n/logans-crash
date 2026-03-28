@@ -37,6 +37,26 @@
         .shop-item.cant-afford{opacity:0.5}
         .coin-display{background:linear-gradient(135deg,rgba(251,191,36,0.2),rgba(245,158,11,0.2));border:1px solid rgba(251,191,36,0.4)}
         .badge{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center}
+        .leaderboard-tabs{display:flex;gap:6px;margin-bottom:12px}
+        .leaderboard-tab{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;text-transform:uppercase;background:rgba(30,41,59,0.5);border:1px solid rgba(56,189,248,0.2);color:#94a3b8;transition:all .2s;cursor:pointer}
+        .leaderboard-tab.active{background:rgba(56,189,248,0.2);border-color:#38bdf8;color:#38bdf8}
+        .leaderboard-table{width:100%;border-collapse:collapse}
+        .leaderboard-table th{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#64748b;padding:8px 6px;text-align:left}
+        .leaderboard-table td{padding:10px 6px;border-bottom:1px solid rgba(30,41,59,0.5);font-size:13px}
+        .leaderboard-table tr:nth-child(1) td{color:#fbbf24}
+        .leaderboard-table tr:nth-child(2) td{color:#94a3b8}
+        .leaderboard-table tr:nth-child(3) td{color:#cd7c2e}
+        .leaderboard-table tr.my-entry td{border:2px solid #38bdf8;border-radius:8px;background:rgba(56,189,248,0.1)}
+        .rank-cell{font-family:'Orbitron',sans-serif;font-weight:900;min-width:32px}
+        .name-cell{max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .score-cell{font-family:'Orbitron',sans-serif;font-weight:700}
+        .diff-badge{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase}
+        .diff-leicht{background:rgba(16,185,129,0.2);color:#10b981}
+        .diff-mittel{background:rgba(245,158,11,0.2);color:#f59e0b}
+        .diff-schwer{background:rgba(239,68,68,0.2);color:#ef4444}
+        .nickname-edit-btn{background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;margin-left:8px}
+        .nickname-modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px}
+        .nickname-modal-box{background:#0f172a;border:2px solid rgba(56,189,248,0.3);border-radius:16px;padding:24px;width:min(320px,100%)}
     </style>
 </head>
 <body>
@@ -50,8 +70,12 @@
     </button>
     <div id="ui-layer" class="ui-layer">
         <div id="menu-start" class="menu-box">
+            <div class="flex items-center justify-center mb-1">
+                <span id="menu-nickname" class="text-sm text-slate-400 font-bold">Hallo Spieler 👋</span>
+                <button class="nickname-edit-btn" onclick="window.gameControl.editNickname()">✏️</button>
+            </div>
             <h1 class="text-3xl md:text-5xl font-game font-black mb-1 italic uppercase tracking-tighter text-center">LOGAN'S <span class="text-sky-500">GEOMETRIE</span> CRASH</h1>
-            <p class="text-slate-500 mb-4 text-xs tracking-widest uppercase font-bold text-center">Haptic Edition v6.8</p>
+            <p class="text-slate-500 mb-4 text-xs tracking-widest uppercase font-bold text-center">Haptic Edition v6.10</p>
             <div class="coin-display flex items-center gap-2 mb-6 px-5 py-2 rounded-full"><span class="text-2xl">⚽</span><span class="text-xl font-game font-bold text-amber-400" id="menu-coins">0</span></div>
             <div class="flex flex-row flex-wrap justify-center">
                 <div class="flex flex-col items-center"><button class="btn-menu bg-emerald-500 text-white font-game" onclick="window.gameControl.start('leicht')">Leicht</button><span class="text-xs text-emerald-400 uppercase font-bold" id="hs-leicht">Best: 0</span></div>
@@ -59,6 +83,7 @@
                 <div class="flex flex-col items-center"><button class="btn-menu bg-rose-500 text-white font-game" onclick="window.gameControl.start('schwer')">Schwer</button><span class="text-xs text-rose-400 uppercase font-bold" id="hs-schwer">Best: 0</span></div>
             </div>
             <button class="btn-menu bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-game mt-6" onclick="window.gameControl.openShop()">🛒 Shop</button>
+            <button class="btn-menu bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-game" onclick="window.gameControl.openLeaderboard()">🏆 Rangliste</button>
         </div>
         <div id="menu-shop" class="menu-box" style="display:none">
             <h2 class="text-3xl font-game font-black text-amber-400 mb-2 italic uppercase">🏪 Logan's Shop</h2>
@@ -82,10 +107,30 @@
             <div class="text-6xl font-game font-black text-white mb-2" id="final-score">0</div>
             <div class="coin-display flex items-center gap-2 mb-4 px-4 py-2 rounded-full"><span class="text-lg">+⚽</span><span class="text-lg font-game font-bold text-amber-400" id="session-coins">0</span></div>
             <div class="text-sky-400 text-xs font-bold uppercase mb-6 tracking-widest" id="new-record-msg" style="display:none">🎉 NEUER REKORD!</div>
+            <div class="text-amber-400 text-lg font-bold mb-4" id="rank-msg" style="display:none"></div>
             <div class="flex flex-row space-x-4">
                 <button class="btn-menu bg-sky-500 text-slate-950 font-game shadow-none" onclick="window.gameControl.start(window.currentDiff)">Nochmal</button>
-                <button class="btn-menu bg-white text-slate-950 font-game shadow-none" onclick="window.gameControl.home()">Menü</button>
+                <button class="btn-menu bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-game shadow-none" onclick="window.gameControl.openLeaderboard()">📊 Rangliste</button>
             </div>
+            <button class="btn-menu bg-white text-slate-950 font-game shadow-none mt-4" onclick="window.gameControl.home()">Menü</button>
+        </div>
+        <div id="menu-leaderboard" class="menu-box" style="display:none">
+            <h2 class="text-3xl font-game font-black text-amber-400 mb-2 italic uppercase">🏆 Rangliste</h2>
+            <div class="w-full max-w-lg">
+                <div class="leaderboard-tabs" id="leaderboard-tabs">
+                    <button class="leaderboard-tab active" data-diff="all">Alle</button>
+                    <button class="leaderboard-tab" data-diff="leicht">Leicht</button>
+                    <button class="leaderboard-tab" data-diff="mittel">Mittel</button>
+                    <button class="leaderboard-tab" data-diff="schwer">Schwer</button>
+                </div>
+                <div class="overflow-y-auto" style="max-height:50vh">
+                    <table class="leaderboard-table">
+                        <thead><tr><th>#</th><th>Name</th><th>Score</th><th>Schwi.</th><th>Datum</th></tr></thead>
+                        <tbody id="leaderboard-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <button class="btn-menu bg-sky-600 text-white font-game shadow-none mt-6" onclick="window.gameControl.home()">Zurück</button>
         </div>
     </div>
     <div id="hud" class="fixed top-4 left-6 flex space-x-3 z-[120] pointer-events-none" style="display:none">
@@ -106,12 +151,47 @@ const isNativeApp=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window
 if(isNativeApp)document.body.classList.add('native-app');
 const canvas=document.getElementById('gameCanvas');
 const ctx=canvas.getContext('2d');
-const HS_PREFIX='logans_crash_hs_v50_';
-const COINS_KEY='logans_crash_coins_v50';
-const SKINS_KEY='logans_crash_skins_v50';
-const TRAILS_KEY='logans_crash_trails_v50';
-const EQUIPPED_SKIN_KEY='logans_crash_equipped_skin_v50';
-const EQUIPPED_TRAIL_KEY='logans_crash_equipped_trail_v50';
+const Preferences=window.Capacitor?window.Capacitor.Plugins.Preferences:null;
+const PREF_KEYS={coins:'logans_crash_coins',skins:'logans_crash_skins',trails:'logans_crash_trails',equippedSkin:'logans_crash_equipped_skin',equippedTrail:'logans_crash_equipped_trail',hsLeicht:'logans_crash_hs_leicht',hsMittel:'logans_crash_hs_mittel',hsSchwer:'logans_crash_hs_schwer',nickname:'logans_crash_nickname',leaderboard:'logans_crash_leaderboard'};
+async function prefGet(key){if(!Preferences)return localStorage.getItem(key)||null;const r=await Preferences.get({key});return r.value;}
+async function prefSet(key,value){if(!Preferences)return localStorage.setItem(key,value),void 0;await Preferences.set({key,value});}
+
+// Sync cache for game loop access
+let cache={coins:0,ownedSkins:['default'],ownedTrails:['default'],equippedSkin:'default',equippedTrail:'default',hs:{leicht:0,mittel:0,schwer:0},nickname:null};
+
+// Sync accessors (use cache)
+const getCoinsSync=()=>cache.coins;
+const getOwnedSkinsSync=()=>cache.ownedSkins;
+const getOwnedTrailsSync=()=>cache.ownedTrails;
+const getEquippedSkinSync=()=>cache.equippedSkin;
+const getEquippedTrailSync=()=>cache.equippedTrail;
+const getHSSync=(diff)=>cache.hs[diff]||0;
+const getNicknameSync=()=>cache.nickname;
+
+// Async setters that update both cache and storage
+async function setCoins(v){cache.coins=v;await prefSet(PREF_KEYS.coins,String(v));}
+async function addCoins(n){cache.coins+=n;await prefSet(PREF_KEYS.coins,String(cache.coins));return cache.coins;}
+async function spendCoins(n){if(cache.coins<n)return false;cache.coins-=n;await prefSet(PREF_KEYS.coins,String(cache.coins));return true;}
+async function saveOwnedSkins(o){cache.ownedSkins=o;await prefSet(PREF_KEYS.skins,JSON.stringify(o));}
+async function saveOwnedTrails(o){cache.ownedTrails=o;await prefSet(PREF_KEYS.trails,JSON.stringify(o));}
+async function setEquippedSkin(id){cache.equippedSkin=id;await prefSet(PREF_KEYS.equippedSkin,id);}
+async function setEquippedTrail(id){cache.equippedTrail=id;await prefSet(PREF_KEYS.equippedTrail,id);}
+async function unlockSkin(id){if(!cache.ownedSkins.includes(id)){cache.ownedSkins.push(id);await prefSet(PREF_KEYS.skins,JSON.stringify(cache.ownedSkins));}}
+async function unlockTrail(id){if(!cache.ownedTrails.includes(id)){cache.ownedTrails.push(id);await prefSet(PREF_KEYS.trails,JSON.stringify(cache.ownedTrails));}}
+async function saveHS(diff,s){if(s>cache.hs[diff]){cache.hs[diff]=s;await prefSet(PREF_KEYS['hs'+diff.charAt(0).toUpperCase()+diff.slice(1)],String(s));return true}return false;}
+async function setNickname(n){cache.nickname=n;await prefSet(PREF_KEYS.nickname,n);}
+async function updateNicknameDisplay(){ui.menuNickname.innerText='Hallo '+(cache.nickname||'Spieler')+' 👋';}
+async function getLeaderboardEntries(){const v=await prefGet(PREF_KEYS.leaderboard);if(!v)return[];try{return JSON.parse(v);}catch{return[];}}
+async function saveLeaderboardEntries(entries){await prefSet(PREF_KEYS.leaderboard,JSON.stringify(entries));}
+async function saveToLeaderboard(score,difficulty){const name=cache.nickname||'Spieler';const entries=await getLeaderboardEntries();const newEntry={id:Date.now(),nickname:name,score:score,difficulty:difficulty,date:new Date().toISOString().split('T')[0]};entries.push(newEntry);entries.sort((a,b)=>b.score-a.score);const top100=entries.slice(0,100);await saveLeaderboardEntries(top100);return top100.findIndex(e=>e.id===newEntry.id)+1;}
+async function renderLeaderboard(diff){const entries=await getLeaderboardEntries();let filtered=diff==='all'?entries:entries.filter(e=>e.difficulty===diff);filtered=filtered.slice(0,20);const tbody=document.getElementById('leaderboard-tbody');tbody.innerHTML='';filtered.forEach((e,i)=>{const rank=i+1;const isMe=cache.nickname&&e.nickname===cache.nickname;const diffClass='diff-'+e.difficulty;const tr=document.createElement('tr');if(isMe)tr.className='my-entry';tr.innerHTML='<td class="rank-cell">'+rank+'</td><td class="name-cell">'+e.nickname+'</td><td class="score-cell">'+e.score+'</td><td><span class="diff-badge '+diffClass+'">'+e.difficulty+'</span></td><td class="text-slate-500">'+e.date+'</td>';tbody.appendChild(tr)});if(filtered.length===0){const tr=document.createElement('tr');tr.innerHTML='<td colspan="5" class="text-center text-slate-500 py-8">Noch keine Einträge</td>';tbody.appendChild(tr);}}
+
+// Init cache from storage
+async function initCache(){try{const cv=await prefGet(PREF_KEYS.coins);cache.coins=parseInt(cv||'0');}catch{cache.coins=0}try{const sv=await prefGet(PREF_KEYS.skins);cache.ownedSkins=JSON.parse(sv||'["default"]');}catch{cache.ownedSkins=['default']}try{const tv=await prefGet(PREF_KEYS.trails);cache.ownedTrails=JSON.parse(tv||'["default"]');}catch{cache.ownedTrails=['default']}try{const es=await prefGet(PREF_KEYS.equippedSkin);cache.equippedSkin=es||'default';}catch{cache.equippedSkin='default'}try{const et=await prefGet(PREF_KEYS.equippedTrail);cache.equippedTrail=et||'default';}catch{cache.equippedTrail='default'}try{const hl=await prefGet(PREF_KEYS.hsLeicht);cache.hs.leicht=parseInt(hl||'0');}catch{cache.hs.leicht=0}try{const hm=await prefGet(PREF_KEYS.hsMittel);cache.hs.mittel=parseInt(hm||'0');}catch{cache.hs.mittel=0}try{const hs=await prefGet(PREF_KEYS.hsSchwer);cache.hs.schwer=parseInt(hs||'0');}catch{cache.hs.schwer=0}try{const nn=await prefGet(PREF_KEYS.nickname);cache.nickname=nn;}catch{cache.nickname=null}}
+
+// Refresh HS display from cache
+function refreshHSDisplay(){ui.hsLabels.leicht.innerText="Best: "+cache.hs.leicht;ui.hsLabels.mittel.innerText="Best: "+cache.hs.mittel;ui.hsLabels.schwer.innerText="Best: "+cache.hs.schwer;}
+let lastRank=0;
 const SKINS=[
 {id:'default',name:'Standard',color:'#38bdf8',shape:'square',price:0},
 {id:'red',name:'Rot Feuer',color:'#ef4444',shape:'square',price:5},
@@ -174,28 +254,16 @@ const player={x:0,y:0,size:38,vy:0,g:0.42,jP:-12,ground:0,speed:9,jumping:false,
 let enemies=[],sides=[],fx=[],coins=[],powerups=[];
 let firstSpawn=true;
 
-function getCoins(){return parseInt(localStorage.getItem(COINS_KEY)||'0')}
-function addCoins(n){const c=getCoins()+n;localStorage.setItem(COINS_KEY,c);return c}
-function spendCoins(n){const c=getCoins();if(c<n)return false;localStorage.setItem(COINS_KEY,c-n);return true}
-function getOwnedSkins(){return JSON.parse(localStorage.getItem(SKINS_KEY)||'["default"]')}
-function getOwnedTrails(){return JSON.parse(localStorage.getItem(TRAILS_KEY)||'["default"]')}
-function getEquippedSkin(){return localStorage.getItem(EQUIPPED_SKIN_KEY)||'default'}
-function getEquippedTrail(){return localStorage.getItem(EQUIPPED_TRAIL_KEY)||'default'}
-function setEquippedSkin(id){localStorage.setItem(EQUIPPED_SKIN_KEY,id)}
-function setEquippedTrail(id){localStorage.setItem(EQUIPPED_TRAIL_KEY,id)}
-function unlockSkin(id){const o=getOwnedSkins();if(!o.includes(id)){o.push(id);localStorage.setItem(SKINS_KEY,JSON.stringify(o))}}
-function unlockTrail(id){const o=getOwnedTrails();if(!o.includes(id)){o.push(id);localStorage.setItem(TRAILS_KEY,JSON.stringify(o))}}
-
 function svgBadgeCheck(){return'<svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="11" fill="#10b981"/><polyline points="6,11 10,15 16,7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>'}
 function svgBadgeStar(){return'<svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="11" fill="#fbbf24"/><polygon points="11,3 13.1,8.5 19,8.5 14.3,12.2 16.1,18 11,14.3 5.9,18 7.7,12.2 3,8.5 8.9,8.5" fill="#020617"/></svg>'}
 function svgBadgeLock(){return'<svg width="22" height="22" viewBox="0 0 22 22"><rect x="3" y="9" width="16" height="11" rx="2" fill="rgba(100,116,139,0.9)"/><path d="M7 9V7a4 4 0 0 1 8 0v2" stroke="rgba(100,116,139,0.9)" stroke-width="2" fill="none" stroke-linecap="round"/></svg>'}
 function getPowerupMeta(type){const meta={shield:{label:'Schild',icon:'🛡️',hint:'Schützt vor 1 Treffer',color:'#fbbf24'},magnet:{label:'Magnet',icon:'🧲',hint:'Zieht Münzen an',color:'#ef4444'},slowmo:{label:'Zeitlupe',icon:'⏱️',hint:'Verlangsamt Gegner',color:'#06b6d4'}};return meta[type]||{label:type,icon:'?',hint:'',color:'#fff'}}
 function getTrailPreview(trail){if(trail.type==='stardust')return '<div class="text-xl mb-1">✨</div>';if(trail.type==='bubbles')return '<div class="text-xl mb-1">🫧</div>';if(trail.type==='sparks')return '<div class="text-xl mb-1">⚡</div>';if(trail.type==='lightning')return '<div class="text-xl mb-1">🌩️</div>';if(trail.type==='hearts')return '<div class="text-xl mb-1">💖</div>';const bgStyle=trail.color==='rainbow'?'background:conic-gradient(red,yellow,lime,aqua,blue,magenta,red)':'background:'+trail.color;return '<div class="w-14 h-3 mx-auto rounded-full mb-2" style="'+bgStyle+'"></div>'}
 function renderShop(){
-const coins=getCoins();
+const coins=getCoinsSync();
 ui.menuCoins.innerText=coins;ui.shopCoins.innerText=coins;
-const ownedSkins=getOwnedSkins(),equippedSkin=getEquippedSkin();
-const ownedTrails=getOwnedTrails(),equippedTrail=getEquippedTrail();
+const ownedSkins=getOwnedSkinsSync(),equippedSkin=getEquippedSkinSync();
+const ownedTrails=getOwnedTrailsSync(),equippedTrail=getEquippedTrailSync();
 const skinsContainer=document.getElementById('shop-skins');
 skinsContainer.innerHTML='';
 SKINS.forEach(skin=>{
@@ -225,7 +293,7 @@ else if(!canAfford){badge=svgBadgeLock();}
 const priceTag=!isOwned?'<span class="text-xs text-amber-400 block">⚽ '+skin.price+'</span>':'';
 div.className='shop-item '+(isOwned?(isEquipped?'equipped':'owned'):'')+(!isOwned&&!canAfford?' cant-afford':'');
 div.innerHTML='<div class="w-10 h-10 mx-auto rounded-lg mb-2" style="'+bgStyle+'"></div><span class="text-xs font-bold">'+skin.name+'</span>'+priceTag+'<div class="badge">'+badge+'</div>';
-div.onclick=()=>{if(isOwned){setEquippedSkin(skin.id);sound.equip();renderShop()}else if(canAfford&&spendCoins(skin.price)){unlockSkin(skin.id);setEquippedSkin(skin.id);sound.purchase();renderShop()}};
+div.onclick=()=>{if(isOwned){setEquippedSkin(skin.id);sound.equip();renderShop()}else if(canAfford){spendCoins(skin.price).then(ok=>{if(ok){unlockSkin(skin.id);setEquippedSkin(skin.id);sound.purchase();renderShop()}})};
 skinsContainer.appendChild(div)});
 const trailsContainer=document.getElementById('shop-trails');
 const specialTrailsContainer=document.getElementById('shop-special-trails');
@@ -242,7 +310,7 @@ else if(!canAfford){badge=svgBadgeLock();}
 const priceTag=!isOwned?'<span class="text-xs text-amber-400 block">⚽ '+trail.price+'</span>':'';
 div.className='shop-item '+(isOwned?(isEquipped?'equipped':'owned'):'')+(!isOwned&&!canAfford?' cant-afford':'');
 div.innerHTML=getTrailPreview(trail)+'<span class="text-xs font-bold block">'+trail.name+'</span>'+priceTag+'<div class="badge">'+badge+'</div>';
-div.onclick=()=>{if(isOwned){setEquippedTrail(trail.id);sound.equip();renderShop()}else if(canAfford&&spendCoins(trail.price)){unlockTrail(trail.id);setEquippedTrail(trail.id);sound.purchase();renderShop()}};
+div.onclick=()=>{if(isOwned){setEquippedTrail(trail.id);sound.equip();renderShop()}else if(canAfford){spendCoins(trail.price).then(ok=>{if(ok){unlockTrail(trail.id);setEquippedTrail(trail.id);sound.purchase();renderShop()}})};
 (trail.type?specialTrailsContainer:trailsContainer).appendChild(div)})}
 
 function initStars(){stars=[];for(let i=0;i<80;i++)stars.push({x:Math.random()*cw,y:Math.random()*ch,size:Math.random()*2+0.5,speed:Math.random()*0.5+0.1,twinkle:Math.random()*Math.PI*2})}
@@ -264,17 +332,13 @@ function positionControls(){ui.controls.style.bottom='60px'}
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',()=>setTimeout(resize,100));window.visualViewport&&window.visualViewport.addEventListener('resize',()=>setTimeout(resize,100));
 resize();
 
-const getHS=(diff)=>parseInt(localStorage.getItem(HS_PREFIX+diff)||'0');
-const saveHS=(diff,s)=>{const best=getHS(diff);if(s>best){localStorage.setItem(HS_PREFIX+diff,s);return true}return false};
-const refreshHSDisplay=()=>{Object.keys(settings).forEach(key=>ui.hsLabels[key].innerText="Best: "+getHS(key))};refreshHSDisplay();
-
 window.addEventListener('keydown',e=>{if(!active)return;switch(e.code){case'ArrowLeft':case'KeyA':input.L=true;break;case'ArrowRight':case'KeyD':input.R=true;break;case'ArrowUp':case'KeyW':case'Space':input.J=true;triggerJump();break}if(['Space','ArrowUp','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault()});
 window.addEventListener('keyup',e=>{switch(e.code){case'ArrowLeft':case'KeyA':input.L=false;break;case'ArrowRight':case'KeyD':input.R=false;break;case'ArrowUp':case'KeyW':case'Space':input.J=false;break}});
 
 const bind=(id,key)=>{const el=document.getElementById(id);el.addEventListener('touchstart',(e)=>{e.preventDefault();initAudio();input[key]=true;if(key==='J')triggerJump()},{passive:false});el.addEventListener('touchend',(e)=>{e.preventDefault();input[key]=false},{passive:false})};
 bind('btn-L','L');bind('btn-R','R');bind('btn-J','J');
 
-window.gameControl={start:(d)=>{initAudio();window.currentDiff=d;const s=settings[d];player.jP=s.jP;player.g=s.g;player.speed=s.speed;score=0;sessionCoins=0;spawnAccumulator=0;sideAccumulator=0;powerupAccumulator=0;coinAccumulator=0;comboCount=0;comboTimer=0;jumpClearedCount=0;clearedEnemiesThisJump=[];activePowerup=null;enemies=[];sides=[];fx=[];coins=[];powerups=[];trailParticles=[];ui.live.innerText="0";ui.liveCoins.innerText="0";ui.hudBest.innerText=getHS(d);ui.hudMode.innerText=d.toUpperCase();ui.start.style.display='none';ui.shop.style.display='none';ui.crash.style.display='none';ui.newRecord.style.display='none';ui.hud.style.display='flex';ui.controls.style.display='flex';document.getElementById('powerupCanvas').style.display='none';active=true;player.x=cw/2-player.size/2;player.y=player.ground;player.vy=0;player.jumping=false;player.trail=[];lastTime=0;firstSpawn=true;startMusic()},home:()=>{active=false;stopMusic();ui.crash.style.display='none';ui.shop.style.display='none';ui.hud.style.display='none';ui.controls.style.display='none';ui.start.style.display='flex';refreshHSDisplay();ui.menuCoins.innerText=getCoins()},openShop:()=>{renderShop();ui.start.style.display='none';ui.shop.style.display='flex'},toggleFullscreen:()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});else document.exitFullscreen()}};
+window.gameControl={start:(d)=>{initAudio();window.currentDiff=d;const s=settings[d];player.jP=s.jP;player.g=s.g;player.speed=s.speed;score=0;sessionCoins=0;spawnAccumulator=0;sideAccumulator=0;powerupAccumulator=0;coinAccumulator=0;comboCount=0;comboTimer=0;jumpClearedCount=0;clearedEnemiesThisJump=[];activePowerup=null;enemies=[];sides=[];fx=[];coins=[];powerups=[];trailParticles=[];ui.live.innerText="0";ui.liveCoins.innerText="0";ui.hudBest.innerText=getHSSync(d);ui.hudMode.innerText=d.toUpperCase();ui.start.style.display='none';ui.shop.style.display='none';ui.crash.style.display='none';ui.newRecord.style.display='none';ui.hud.style.display='flex';ui.controls.style.display='flex';document.getElementById('powerupCanvas').style.display='none';active=true;player.x=cw/2-player.size/2;player.y=player.ground;player.vy=0;player.jumping=false;player.trail=[];lastTime=0;firstSpawn=true;startMusic()},home:()=>{active=false;stopMusic();ui.crash.style.display='none';ui.shop.style.display='none';ui.hud.style.display='none';ui.controls.style.display='none';ui.start.style.display='flex';refreshHSDisplay();ui.menuCoins.innerText=getCoinsSync()},openShop:()=>{renderShop();ui.start.style.display='none';ui.shop.style.display='flex'},openLeaderboard:()=>{renderLeaderboard('all');ui.start.style.display='none';ui.shop.style.display='none';ui.crash.style.display='none';ui.leaderboard.style.display='flex'},editNickname:()=>{document.getElementById('nickname-input').value=cache.nickname||'';document.getElementById('nickname-modal').style.display='flex'},saveNickname:()=>{const name=document.getElementById('nickname-input').value.trim()||'Spieler';setNickname(name);updateNicknameDisplay();document.getElementById('nickname-modal').style.display='none'},cancelNickname:()=>{document.getElementById('nickname-modal').style.display='none'},toggleFullscreen:()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});else document.exitFullscreen()}};
 
 const COMBO_WINDOW=1500;
 function showCombo(n){const div=document.createElement('div');div.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:Orbitron,sans-serif;font-size:4rem;font-weight:900;color:#fbbf24;text-shadow:0 0 30px rgba(251,191,36,0.8);z-index:200;pointer-events:none;animation:comboPop 0.6s ease-out forwards';div.innerText='x'+n+'!';document.body.appendChild(div);setTimeout(()=>div.remove(),600)}
@@ -293,8 +357,8 @@ function spawnSide(){const fromLeft=Math.random()>0.5;sides.push({x:fromLeft?-60
 
 function getRandomColor(){return'hsl('+Math.floor(Math.random()*360)+',70%,55%)'}
 function getRainbowColor(){rainbowHue=(rainbowHue+5)%360;return'hsl('+rainbowHue+',80%,60%)'}
-function getEquippedSkinData(){const id=getEquippedSkin();return SKINS.find(s=>s.id===id)||SKINS[0]}
-function getEquippedTrailData(){const id=getEquippedTrail();return TRAILS.find(t=>t.id===id)||TRAILS[0]}
+function getEquippedSkinData(){const id=getEquippedSkinSync();return SKINS.find(s=>s.id===id)||SKINS[0]}
+function getEquippedTrailData(){const id=getEquippedTrailSync();return TRAILS.find(t=>t.id===id)||TRAILS[0]}
 function getPlayerColor(){const skin=getEquippedSkinData();return skin.color==='rainbow'?getRainbowColor():skin.color}
 
 function drawPlayerPattern(px,py,size,skin,glowColor){
@@ -373,7 +437,7 @@ function checkCoinHit(p,c){return p.x<c.x+c.size&&p.x+p.size>c.x&&p.y<c.y+c.size
 
 function drawPolygon(x,y,radius,sides,rotation){ctx.beginPath();for(let i=0;i<sides;i++){const angle=rotation+(i*2*Math.PI)/sides;const px=x+radius*Math.cos(angle);const py=y+radius*Math.sin(angle);if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py)}ctx.closePath();ctx.fill()}
 
-function crash(){active=false;stopMusic();sound.crash();haptics.crash();spawnFX(player.x+player.size/2,player.y+player.size/2,'#ef4444',40,1.5);shakeIntensity=15;const totalCoins=addCoins(sessionCoins);ui.final.innerText=score;ui.sessionCoins.innerText=sessionCoins;ui.hud.style.display='none';ui.controls.style.display='none';ui.crash.style.display='flex';ui.powerupDisplay.style.display='none';document.getElementById('powerupCanvas').style.display='none';if(saveHS(window.currentDiff,score))ui.newRecord.style.display='block'}
+async function crash(){active=false;stopMusic();sound.crash();haptics.crash();spawnFX(player.x+player.size/2,player.y+player.size/2,'#ef4444',40,1.5);shakeIntensity=15;await addCoins(sessionCoins);const rank=await saveToLeaderboard(score,window.currentDiff);lastRank=rank;ui.final.innerText=score;ui.sessionCoins.innerText=sessionCoins;ui.hud.style.display='none';ui.controls.style.display='none';ui.crash.style.display='flex';ui.powerupDisplay.style.display='none';document.getElementById('powerupCanvas').style.display='none';const isNewRecord=await saveHS(window.currentDiff,score);if(isNewRecord)ui.newRecord.style.display='block';ui.rankMsg.style.display='block';ui.rankMsg.innerText='📊 Rang #'+rank;if(rank<=10)ui.rankMsg.innerText+=' 🎉 TOP 10!';}
 
 function draw(){ctx.save();if(shakeIntensity>0.5){shakeX=(Math.random()-0.5)*shakeIntensity;shakeY=(Math.random()-0.5)*shakeIntensity;ctx.translate(shakeX,shakeY);shakeIntensity*=0.9}else{shakeIntensity=0;shakeX=0;shakeY=0}ctx.clearRect(-10,-10,cw+20,ch+20);drawStars();ctx.strokeStyle='#1e293b';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,player.ground+player.size);ctx.lineTo(cw,player.ground+player.size);ctx.stroke();fx.forEach(p=>{ctx.globalAlpha=Math.max(0,p.l);ctx.fillStyle=p.col;if(p.isText){ctx.font='900 24px Orbitron';ctx.fillText(p.text,p.x,p.y)}else{ctx.fillRect(p.x,p.y,4,4)}});ctx.globalAlpha=1
 
@@ -392,7 +456,21 @@ ctx.globalAlpha=1;const skin=getEquippedSkinData();const glowColor=activePowerup
 ctx.restore()}
 
 function loop(now){if(!lastTime)lastTime=now;const delta=now-lastTime;lastTime=now;update(Math.min(delta/16.66,2.2));draw();requestAnimationFrame(loop)}
+// Init
+initCache().then(()=>{refreshHSDisplay();updateNicknameDisplay();if(!cache.nickname){setTimeout(()=>window.gameControl.editNickname(),500)}});
+// Leaderboard tabs
+document.getElementById('leaderboard-tabs').addEventListener('click',e=>{if(e.target.classList.contains('leaderboard-tab')){document.querySelectorAll('.leaderboard-tab').forEach(t=>t.classList.remove('active'));e.target.classList.add('active');renderLeaderboard(e.target.dataset.diff)}});
 requestAnimationFrame(loop);})();
 </script>
+    <div id="nickname-modal" class="nickname-modal" style="display:none">
+        <div class="nickname-modal-box">
+            <h3 class="text-xl font-game font-bold text-sky-400 mb-4 italic uppercase">Spielername</h3>
+            <input type="text" id="nickname-input" maxlength="12" placeholder="Dein Name..." class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white text-lg focus:outline-none focus:border-sky-500 mb-4">
+            <div class="flex gap-3">
+                <button class="flex-1 btn-menu bg-slate-700 text-white font-game shadow-none py-3" onclick="window.gameControl.cancelNickname()">Abbrechen</button>
+                <button class="flex-1 btn-menu bg-sky-500 text-slate-950 font-game shadow-none py-3" onclick="window.gameControl.saveNickname()">Speichern</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
