@@ -3,6 +3,6 @@
   "appName": "Logan's Geometrie Crash",
   "webDir": "dist",
   "server": {
-    "androidScheme": "https"
+    "androidScheme": "http"
   }
 }
