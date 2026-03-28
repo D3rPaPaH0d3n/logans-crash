@@ -55,8 +55,8 @@
         .diff-mittel{background:rgba(245,158,11,0.2);color:#f59e0b}
         .diff-schwer{background:rgba(239,68,68,0.2);color:#ef4444}
         .nickname-edit-btn{background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;margin-left:8px}
-        .nickname-modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px}
-        .nickname-modal-box{background:#0f172a;border:2px solid rgba(56,189,248,0.3);border-radius:16px;padding:24px;width:min(320px,100%)}
+        .nickname-modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:3000;display:flex;align-items:center;justify-content:center;padding:12px}
+        .nickname-modal-box{background:#0f172a;border:2px solid rgba(56,189,248,0.3);border-radius:16px;padding:16px;width:min(300px,90%);box-sizing:border-box}
     </style>
 </head>
 <body>
@@ -418,7 +418,16 @@ const haptics={jump:()=>{if(navigator.vibrate)navigator.vibrate(10)},bonus:()=>{
 
 const sound={jump:()=>{playTone(280,560,0.1,'sine',0.1);setTimeout(()=>playTone(420,620,0.07,'sine',0.07),25)},coin:()=>{playTone(880,1320,0.08,'sine',0.12);setTimeout(()=>playTone(1100,1540,0.1,'sine',0.1),40)},powerup:()=>{playTone(400,800,0.1,'square',0.1);setTimeout(()=>playTone(600,1200,0.1,'square',0.1),80);setTimeout(()=>playTone(800,1600,0.15,'square',0.1),160)},purchase:()=>{playTone(523,784,0.1,'sine',0.12);setTimeout(()=>playTone(659,987,0.1,'sine',0.12),100);setTimeout(()=>playTone(784,1175,0.15,'sine',0.12),200)},equip:()=>playTone(440,660,0.08,'sine',0.1),crash:()=>{playTone(300,50,0.4,'sawtooth',0.2);playTone(200,30,0.35,'square',0.15)},combo:(level)=>{const f=400+level*100;playTone(f,f*1.5,0.1,'sine',0.12);setTimeout(()=>playTone(f*1.25,f*2,0.12,'sine',0.1),80)},bonus:()=>{playTone(1047,1568,0.08,'sine',0.12);setTimeout(()=>playTone(1175,1760,0.08,'sine',0.12),60);setTimeout(()=>playTone(1319,1976,0.08,'sine',0.12),120);setTimeout(()=>playTone(1568,2349,0.15,'sine',0.12),180)}};
 
-function resize(){cw=window.innerWidth;ch=window.innerHeight;canvas.width=cw;canvas.height=ch;player.ground=ch-Math.max(50,Math.round(ch*0.07));if(!active){player.x=cw/2-player.size/2;player.y=player.ground}initStars();positionControls()}
+// Reference game world size — all gameplay scales relative to this
+const REF_W=800,REF_H=400;
+let gameScale=1;
+function resize(){cw=window.innerWidth;ch=window.innerHeight;canvas.width=cw;canvas.height=ch;
+// Scale factor: ensure gameplay feels identical on all screen sizes
+// Use height as primary reference since it determines jump/dodge room
+gameScale=ch/REF_H;
+// Scale player to match reference world
+player.size=Math.round(38*gameScale);
+player.ground=ch-Math.max(50,Math.round(ch*0.07));if(!active){player.x=cw/2-player.size/2;player.y=player.ground}initStars();positionControls()}
 function positionControls(){ui.controls.style.bottom='60px'}
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',()=>setTimeout(resize,100));window.visualViewport&&window.visualViewport.addEventListener('resize',()=>setTimeout(resize,100));
 resize();
@@ -429,7 +438,7 @@ window.addEventListener('keyup',e=>{switch(e.code){case'ArrowLeft':case'KeyA':in
 const bind=(id,key)=>{const el=document.getElementById(id);el.addEventListener('touchstart',(e)=>{e.preventDefault();initAudio();input[key]=true;if(key==='J')triggerJump()},{passive:false});el.addEventListener('touchend',(e)=>{e.preventDefault();input[key]=false},{passive:false})};
 bind('btn-L','L');bind('btn-R','R');bind('btn-J','J');
 
-window.gameControl={start:(d)=>{console.log('gameControl.start called with difficulty:', d);initAudio();window.currentDiff=d;const s=settings[d];player.jP=s.jP;player.g=s.g;player.speed=s.speed;score=0;sessionCoins=0;spawnAccumulator=0;sideAccumulator=0;powerupAccumulator=0;coinAccumulator=0;comboCount=0;comboTimer=0;jumpClearedCount=0;clearedEnemiesThisJump=[];activePowerup=null;enemies=[];sides=[];fx=[];coins=[];powerups=[];trailParticles=[];ui.live.innerText="0";ui.liveCoins.innerText="0";ui.hudBest.innerText=getHSSync(d);ui.hudMode.innerText=d.toUpperCase();ui.start.style.display='none';ui.shop.style.display='none';ui.crash.style.display='none';ui.newRecord.style.display='none';ui.hud.style.display='flex';ui.controls.style.display='flex';document.getElementById('powerupCanvas').style.display='none';active=true;player.x=cw/2-player.size/2;player.y=player.ground;player.vy=0;player.jumping=false;player.trail=[];lastTime=0;firstSpawn=true;startMusic()},home:()=>{active=false;stopMusic();ui.crash.style.display='none';ui.shop.style.display='none';ui.leaderboard.style.display='none';ui.hud.style.display='none';ui.controls.style.display='none';ui.start.style.display='flex';refreshHSDisplay();ui.menuCoins.innerText=getCoinsSync()},openShop:()=>{renderShop();ui.start.style.display='none';ui.shop.style.display='flex'},openLeaderboard:()=>{renderLeaderboard('all');ui.start.style.display='none';ui.shop.style.display='none';ui.crash.style.display='none';ui.leaderboard.style.display='flex'},editNickname:()=>{document.getElementById('nickname-input').value=cache.nickname||'';document.getElementById('nickname-modal').style.display='flex'},saveNickname:()=>{const name=document.getElementById('nickname-input').value.trim()||'Spieler';setNickname(name);updateNicknameDisplay();document.getElementById('nickname-modal').style.display='none'},cancelNickname:()=>{document.getElementById('nickname-modal').style.display='none'},toggleFullscreen:()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});else document.exitFullscreen()}};
+window.gameControl={start:(d)=>{console.log('gameControl.start called with difficulty:', d);initAudio();window.currentDiff=d;const s=settings[d];player.jP=s.jP*gameScale;player.g=s.g*gameScale;player.speed=s.speed*gameScale;score=0;sessionCoins=0;spawnAccumulator=0;sideAccumulator=0;powerupAccumulator=0;coinAccumulator=0;comboCount=0;comboTimer=0;jumpClearedCount=0;clearedEnemiesThisJump=[];activePowerup=null;enemies=[];sides=[];fx=[];coins=[];powerups=[];trailParticles=[];ui.live.innerText="0";ui.liveCoins.innerText="0";ui.hudBest.innerText=getHSSync(d);ui.hudMode.innerText=d.toUpperCase();ui.start.style.display='none';ui.shop.style.display='none';ui.crash.style.display='none';ui.newRecord.style.display='none';ui.hud.style.display='flex';ui.controls.style.display='flex';document.getElementById('powerupCanvas').style.display='none';active=true;player.x=cw/2-player.size/2;player.y=player.ground;player.vy=0;player.jumping=false;player.trail=[];lastTime=0;firstSpawn=true;startMusic()},home:()=>{active=false;stopMusic();ui.crash.style.display='none';ui.shop.style.display='none';ui.leaderboard.style.display='none';ui.hud.style.display='none';ui.controls.style.display='none';ui.start.style.display='flex';refreshHSDisplay();ui.menuCoins.innerText=getCoinsSync()},openShop:()=>{renderShop();ui.start.style.display='none';ui.shop.style.display='flex'},openLeaderboard:()=>{renderLeaderboard('all');ui.start.style.display='none';ui.shop.style.display='none';ui.crash.style.display='none';ui.leaderboard.style.display='flex'},editNickname:()=>{document.getElementById('nickname-input').value=cache.nickname||'';document.getElementById('nickname-modal').style.display='flex'},saveNickname:()=>{const name=document.getElementById('nickname-input').value.trim()||'Spieler';setNickname(name);updateNicknameDisplay();document.getElementById('nickname-modal').style.display='none'},cancelNickname:()=>{document.getElementById('nickname-modal').style.display='none'},toggleFullscreen:()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});else document.exitFullscreen()}};
 console.log('window.gameControl defined:', !!window.gameControl);
 
 const COMBO_WINDOW=1500;
@@ -442,10 +451,10 @@ function spawnFX(x,y,col,n,force){for(let i=0;i<n;i++)fx.push({x,y,vx:(Math.rand
 function spawnCoinFX(x,y){const colors=['#fbbf24','#f59e0b','#fcd34d'];for(let i=0;i<15;i++)fx.push({x,y,vx:(Math.random()-0.5)*15,vy:(Math.random()-1)*10,l:1.2,col:colors[Math.floor(Math.random()*colors.length)]});fx.push({x,y:-20,vx:0,vy:-2,l:2,col:'#fbbf24',text:'+⚽',isText:true})}
 function spawnPowerupFX(x,y,type){const colors={shield:['#fbbf24','#f59e0b'],magnet:['#ef4444','#f87171'],slowmo:['#06b6d4','#38bdf8']};const c=colors[type]||['#fff'];for(let i=0;i<20;i++)fx.push({x,y,vx:(Math.random()-0.5)*20,vy:(Math.random()-0.5)*20,l:1.5,col:c[Math.floor(Math.random()*c.length)]})}
 
-function spawnCoin(){const x=Math.random()*(cw-60)+30;coins.push({x,y:-30,size:24,vy:3,speed:3.5,rot:0,rotS:0.05})}
-function spawnPowerup(){const types=['shield','magnet','slowmo'];const type=types[Math.floor(Math.random()*types.length)];const x=Math.random()*(cw-80)+40;powerups.push({x,y:-40,size:32,vy:2.5,type,speed:4,rot:0,rotS:0.03,glow:0})}
-function spawnEnemy(){let px=Math.random()*(cw-80);const isSuper=Math.random()<0.05;let maxEvo=1;if(score>120)maxEvo=3;else if(score>45)maxEvo=2;const evo=isSuper?1:Math.ceil(Math.random()*maxEvo);const types=['rect','circle','triangle','pentagon'];const rotTypes=['rect','triangle'];const type=isSuper?'star':types[Math.floor(Math.random()*types.length)];const isRotating=rotTypes.includes(type)&&Math.random()>0.5;enemies.push({x:px,y:-100,size:isSuper?34:(28+Math.random()*22),speed:isSuper?2.5:(3.2+(score/60)),rot:0,rotS:isRotating?(Math.random()-0.5)*0.15:0,evo,type,super:isSuper,color:isSuper?'#fbbf24':getRandomColor()})}
-function spawnSide(){const fromLeft=Math.random()>0.5;sides.push({x:fromLeft?-60:cw+60,y:player.ground+(player.size-32),size:32,speed:fromLeft?(5.5+score/50):-(5.5+score/50),color:settings[window.currentDiff].color,isRotating:Math.random()>0.4,rot:0,rotS:(Math.random()-0.5)*0.2})}
+function spawnCoin(){const x=Math.random()*(cw-60*gameScale)+30*gameScale;coins.push({x,y:-30,size:Math.round(24*gameScale),vy:3*gameScale,speed:3.5*gameScale,rot:0,rotS:0.05})}
+function spawnPowerup(){const types=['shield','magnet','slowmo'];const type=types[Math.floor(Math.random()*types.length)];const x=Math.random()*(cw-80*gameScale)+40*gameScale;powerups.push({x,y:-40,size:Math.round(32*gameScale),vy:2.5*gameScale,type,speed:4*gameScale,rot:0,rotS:0.03,glow:0})}
+function spawnEnemy(){let px=Math.random()*(cw-80*gameScale);const isSuper=Math.random()<0.05;let maxEvo=1;if(score>120)maxEvo=3;else if(score>45)maxEvo=2;const evo=isSuper?1:Math.ceil(Math.random()*maxEvo);const types=['rect','circle','triangle','pentagon'];const rotTypes=['rect','triangle'];const type=isSuper?'star':types[Math.floor(Math.random()*types.length)];const isRotating=rotTypes.includes(type)&&Math.random()>0.5;enemies.push({x:px,y:-100,size:isSuper?Math.round(34*gameScale):Math.round((28+Math.random()*22)*gameScale),speed:isSuper?2.5*gameScale:(3.2+(score/60))*gameScale,rot:0,rotS:isRotating?(Math.random()-0.5)*0.15:0,evo,type,super:isSuper,color:isSuper?'#fbbf24':getRandomColor()})}
+function spawnSide(){const fromLeft=Math.random()>0.5;const sideSize=Math.round(32*gameScale);sides.push({x:fromLeft?-60:cw+60,y:player.ground+(player.size-sideSize),size:sideSize,speed:fromLeft?(5.5+score/50)*gameScale:-(5.5+score/50)*gameScale,color:settings[window.currentDiff].color,isRotating:Math.random()>0.4,rot:0,rotS:(Math.random()-0.5)*0.2})}
 
 function getRandomColor(){return'hsl('+Math.floor(Math.random()*360)+',70%,55%)'}
 function getRainbowColor(){rainbowHue=(rainbowHue+5)%360;return'hsl('+rainbowHue+',80%,60%)'}
@@ -513,7 +522,7 @@ if(player.y>=player.ground){player.y=player.ground;player.vy=0;const wasJumping=
 
 sides.forEach((e,i)=>{e.x+=e.speed*scaledDt;if(e.isRotating)e.rot+=e.rotS*scaledDt;if(checkHit(player,e)){if(activePowerup==='shield'){spawnShieldBreak(e.x+e.size/2,e.y+e.size/2);sides.splice(i,1)}else crash()}if(e.x<-150||e.x>cw+150)sides.splice(i,1)});
 
-coins.forEach((c,i)=>{c.y+=c.speed*scaledDt;c.rot+=c.rotS*scaledDt;if(activePowerup==='magnet'){const dx=player.x+player.size/2-c.x;const dy=player.y+player.size/2-c.y;const dist=Math.sqrt(dx*dx+dy*dy);if(dist<150&&dist>0){c.x+=dx/dist*8*scaledDt;c.y+=dy/dist*8*scaledDt}}if(checkCoinHit(player,c)){sessionCoins++;ui.liveCoins.innerText=sessionCoins;sound.coin();haptics.coin();spawnCoinFX(c.x,c.y);coins.splice(i,1)}if(c.y>ch+50)coins.splice(i,1)});
+coins.forEach((c,i)=>{c.y+=c.speed*scaledDt;c.rot+=c.rotS*scaledDt;if(activePowerup==='magnet'){const dx=player.x+player.size/2-c.x;const dy=player.y+player.size/2-c.y;const dist=Math.sqrt(dx*dx+dy*dy);if(dist<150*gameScale&&dist>0){c.x+=dx/dist*8*gameScale*scaledDt;c.y+=dy/dist*8*gameScale*scaledDt}}if(checkCoinHit(player,c)){sessionCoins++;ui.liveCoins.innerText=sessionCoins;sound.coin();haptics.coin();spawnCoinFX(c.x,c.y);coins.splice(i,1)}if(c.y>ch+50)coins.splice(i,1)});
 
 powerups.forEach((p,i)=>{p.y+=p.speed*scaledDt;p.rot+=p.rotS;p.glow=(p.glow+0.1)%(Math.PI*2);if(checkCoinHit(player,p)){activatePowerup(p.type);spawnPowerupFX(p.x+p.size/2,p.y+p.size/2,p.type);powerups.splice(i,1)}if(p.y>ch+50)powerups.splice(i,1)});
 
@@ -611,8 +620,8 @@ initializeGame();
             <h3 class="text-xl font-game font-bold text-sky-400 mb-4 italic uppercase">Spielername</h3>
             <input type="text" id="nickname-input" maxlength="12" placeholder="Dein Name..." class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white text-lg focus:outline-none focus:border-sky-500 mb-4">
             <div class="flex gap-3">
-                <button class="flex-1 btn-menu bg-slate-700 text-white font-game shadow-none py-3" onclick="window.gameControl.cancelNickname()">Abbrechen</button>
-                <button class="flex-1 btn-menu bg-sky-500 text-slate-950 font-game shadow-none py-3" onclick="window.gameControl.saveNickname()">Speichern</button>
+                <button class="flex-1 btn-menu bg-slate-700 text-white font-game shadow-none py-3" style="width:auto;min-width:0;margin:0;padding:12px 8px;font-size:14px" onclick="window.gameControl.cancelNickname()">Abbrechen</button>
+                <button class="flex-1 btn-menu bg-sky-500 text-slate-950 font-game shadow-none py-3" style="width:auto;min-width:0;margin:0;padding:12px 8px;font-size:14px" onclick="window.gameControl.saveNickname()">Speichern</button>
             </div>
         </div>
     </div>
