@@ -148,6 +148,14 @@
 <script>
 (function(){
 console.log('Logan\'s Geometry Crash script starting...');
+// Global error handler
+window.addEventListener('error', function(e) {
+    console.error('Global error caught:', e.message, 'at', e.filename, ':', e.lineno, ':', e.colno);
+    console.error('Error stack:', e.error && e.error.stack);
+});
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('Unhandled promise rejection:', e.reason);
+});
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
 console.log('DOMContentLoaded fired, initializing game...');
@@ -187,7 +195,7 @@ if (!ctx) {
     console.error('Could not get canvas context!');
     return;
 }
-const Preferences = window.Capacitor ? window.Capacitor.Plugins?.Preferences : null;
+const Preferences = window.Capacitor && window.Capacitor.Plugins ? window.Capacitor.Plugins.Preferences : null;
 const PREF_KEYS={coins:'logans_crash_coins',skins:'logans_crash_skins',trails:'logans_crash_trails',equippedSkin:'logans_crash_equipped_skin',equippedTrail:'logans_crash_equipped_trail',hsLeicht:'logans_crash_hs_leicht',hsMittel:'logans_crash_hs_mittel',hsSchwer:'logans_crash_hs_schwer',nickname:'logans_crash_nickname',leaderboard:'logans_crash_leaderboard'};
 async function prefGet(key){
     console.log('prefGet called for key:', key);
