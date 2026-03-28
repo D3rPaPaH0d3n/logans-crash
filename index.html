@@ -55,8 +55,8 @@
         .diff-mittel{background:rgba(245,158,11,0.2);color:#f59e0b}
         .diff-schwer{background:rgba(239,68,68,0.2);color:#ef4444}
         .nickname-edit-btn{background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;margin-left:8px}
-        .nickname-modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:3000;display:flex;align-items:center;justify-content:center;padding:12px}
-        .nickname-modal-box{background:#0f172a;border:2px solid rgba(56,189,248,0.3);border-radius:16px;padding:16px;width:min(300px,90%);box-sizing:border-box}
+        .nickname-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:3000;display:flex;align-items:flex-start;justify-content:center;padding:12px;padding-top:15vh}
+        .nickname-modal-box{background:#0f172a;border:2px solid rgba(56,189,248,0.3);border-radius:16px;padding:20px;width:min(300px,90%);box-sizing:border-box}
     </style>
 </head>
 <body>
@@ -71,7 +71,7 @@
     <div id="ui-layer" class="ui-layer">
         <div id="menu-start" class="menu-box">
             <div class="flex items-center justify-center mb-1">
-                <span id="menu-nickname" class="text-sm text-slate-400 font-bold">Hallo Spieler 👋</span>
+                <span id="menu-nickname" class="text-sm text-slate-400 font-bold">Hey Gamer 👋</span>
                 <button class="nickname-edit-btn" onclick="window.gameControl.editNickname()">✏️</button>
             </div>
             <h1 class="text-3xl md:text-5xl font-game font-black mb-1 italic uppercase tracking-tighter text-center">LOGAN'S <span class="text-sky-500">GEOMETRIE</span> CRASH</h1>
@@ -438,7 +438,7 @@ window.addEventListener('keyup',e=>{switch(e.code){case'ArrowLeft':case'KeyA':in
 const bind=(id,key)=>{const el=document.getElementById(id);el.addEventListener('touchstart',(e)=>{e.preventDefault();initAudio();input[key]=true;if(key==='J')triggerJump()},{passive:false});el.addEventListener('touchend',(e)=>{e.preventDefault();input[key]=false},{passive:false})};
 bind('btn-L','L');bind('btn-R','R');bind('btn-J','J');
 
-window.gameControl={start:(d)=>{console.log('gameControl.start called with difficulty:', d);initAudio();window.currentDiff=d;const s=settings[d];player.jP=s.jP*gameScale;player.g=s.g*gameScale;player.speed=s.speed*gameScale;score=0;sessionCoins=0;spawnAccumulator=0;sideAccumulator=0;powerupAccumulator=0;coinAccumulator=0;comboCount=0;comboTimer=0;jumpClearedCount=0;clearedEnemiesThisJump=[];activePowerup=null;enemies=[];sides=[];fx=[];coins=[];powerups=[];trailParticles=[];ui.live.innerText="0";ui.liveCoins.innerText="0";ui.hudBest.innerText=getHSSync(d);ui.hudMode.innerText=d.toUpperCase();ui.start.style.display='none';ui.shop.style.display='none';ui.crash.style.display='none';ui.newRecord.style.display='none';ui.hud.style.display='flex';ui.controls.style.display='flex';document.getElementById('powerupCanvas').style.display='none';active=true;player.x=cw/2-player.size/2;player.y=player.ground;player.vy=0;player.jumping=false;player.trail=[];lastTime=0;firstSpawn=true;startMusic()},home:()=>{active=false;stopMusic();ui.crash.style.display='none';ui.shop.style.display='none';ui.leaderboard.style.display='none';ui.hud.style.display='none';ui.controls.style.display='none';ui.start.style.display='flex';refreshHSDisplay();ui.menuCoins.innerText=getCoinsSync()},openShop:()=>{renderShop();ui.start.style.display='none';ui.shop.style.display='flex'},openLeaderboard:()=>{renderLeaderboard('all');ui.start.style.display='none';ui.shop.style.display='none';ui.crash.style.display='none';ui.leaderboard.style.display='flex'},editNickname:()=>{document.getElementById('nickname-input').value=cache.nickname||'';document.getElementById('nickname-modal').style.display='flex'},saveNickname:()=>{const name=document.getElementById('nickname-input').value.trim()||'Spieler';setNickname(name);updateNicknameDisplay();document.getElementById('nickname-modal').style.display='none'},cancelNickname:()=>{document.getElementById('nickname-modal').style.display='none'},toggleFullscreen:()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});else document.exitFullscreen()}};
+window.gameControl={start:(d)=>{console.log('gameControl.start called with difficulty:', d);initAudio();window.currentDiff=d;const s=settings[d];player.jP=s.jP*gameScale;player.g=s.g*gameScale;player.speed=s.speed*gameScale;score=0;sessionCoins=0;spawnAccumulator=0;sideAccumulator=0;powerupAccumulator=0;coinAccumulator=0;comboCount=0;comboTimer=0;jumpClearedCount=0;clearedEnemiesThisJump=[];activePowerup=null;enemies=[];sides=[];fx=[];coins=[];powerups=[];trailParticles=[];ui.live.innerText="0";ui.liveCoins.innerText="0";ui.hudBest.innerText=getHSSync(d);ui.hudMode.innerText=d.toUpperCase();ui.start.style.display='none';ui.shop.style.display='none';ui.crash.style.display='none';ui.newRecord.style.display='none';ui.hud.style.display='flex';ui.controls.style.display='flex';document.getElementById('powerupCanvas').style.display='none';active=true;player.x=cw/2-player.size/2;player.y=player.ground;player.vy=0;player.jumping=false;player.trail=[];lastTime=0;firstSpawn=true;startMusic()},home:()=>{active=false;stopMusic();ui.crash.style.display='none';ui.shop.style.display='none';ui.leaderboard.style.display='none';ui.hud.style.display='none';ui.controls.style.display='none';ui.start.style.display='flex';refreshHSDisplay();ui.menuCoins.innerText=getCoinsSync()},openShop:()=>{renderShop();ui.start.style.display='none';ui.shop.style.display='flex'},openLeaderboard:()=>{renderLeaderboard('all');ui.start.style.display='none';ui.shop.style.display='none';ui.crash.style.display='none';ui.leaderboard.style.display='flex'},editNickname:()=>{var ni=document.getElementById('nickname-input');ni.value=cache.nickname||'';document.getElementById('nickname-modal').style.display='flex';setTimeout(function(){ni.focus();ni.click()},100)},saveNickname:()=>{const name=document.getElementById('nickname-input').value.trim()||'Spieler';setNickname(name);updateNicknameDisplay();document.getElementById('nickname-modal').style.display='none'},cancelNickname:()=>{document.getElementById('nickname-modal').style.display='none'},toggleFullscreen:()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});else document.exitFullscreen()}};
 console.log('window.gameControl defined:', !!window.gameControl);
 
 const COMBO_WINDOW=1500;
@@ -617,11 +617,12 @@ initializeGame();
 </script>
     <div id="nickname-modal" class="nickname-modal" style="display:none">
         <div class="nickname-modal-box">
-            <h3 class="text-xl font-game font-bold text-sky-400 mb-4 italic uppercase">Spielername</h3>
-            <input type="text" id="nickname-input" maxlength="12" placeholder="Dein Name..." class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white text-lg focus:outline-none focus:border-sky-500 mb-4">
+            <h3 class="text-xl font-game font-bold text-sky-400 mb-2 italic uppercase">🎮 Dein Gamertag</h3>
+            <p class="text-xs text-slate-400 mb-3">So kennt dich die Rangliste!</p>
+            <input type="text" id="nickname-input" maxlength="12" placeholder="z.B. CrashKing 👑" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white text-lg focus:outline-none focus:border-sky-500 mb-4" autocomplete="off" enterkeyhint="done">
             <div class="flex gap-3">
-                <button class="flex-1 btn-menu bg-slate-700 text-white font-game shadow-none py-3" style="width:auto;min-width:0;margin:0;padding:12px 8px;font-size:14px" onclick="window.gameControl.cancelNickname()">Abbrechen</button>
-                <button class="flex-1 btn-menu bg-sky-500 text-slate-950 font-game shadow-none py-3" style="width:auto;min-width:0;margin:0;padding:12px 8px;font-size:14px" onclick="window.gameControl.saveNickname()">Speichern</button>
+                <button class="flex-1 btn-menu bg-slate-700 text-white font-game shadow-none py-3" style="width:auto;min-width:0;margin:0;padding:12px 8px;font-size:14px" onclick="window.gameControl.cancelNickname()">Nee ✋</button>
+                <button class="flex-1 btn-menu bg-sky-500 text-slate-950 font-game shadow-none py-3" style="width:auto;min-width:0;margin:0;padding:12px 8px;font-size:14px" onclick="window.gameControl.saveNickname()">Los! 🚀</button>
             </div>
         </div>
     </div>
