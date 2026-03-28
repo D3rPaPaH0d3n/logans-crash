@@ -20,34 +20,39 @@
         @media(orientation:portrait){#orientation-msg{display:flex}}
         :root{--gs:1}
         .ui-layer{position:absolute;inset:0;z-index:100;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center}
-        .menu-box{background:rgba(2,6,23,0.95);width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto;overflow-y:auto;padding:calc(20px * var(--gs));font-size:calc(16px * var(--gs))}
+        .menu-box{background:rgba(2,6,23,0.95);width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto;overflow-y:auto;padding:2vh 3vw}
         .controls-container{position:absolute;width:100%;padding:0 60px;display:flex;justify-content:space-between;align-items:flex-end;z-index:150;pointer-events:none;box-sizing:border-box}
         .ctrl-btn{background:rgba(255,255,255,0.02);border:1px solid rgba(56,189,248,0.1);backdrop-filter:blur(1px);border-radius:22px;display:flex;align-items:center;justify-content:center;pointer-events:auto;-webkit-tap-highlight-color:transparent;transition:transform .1s,background .1s}
         .ctrl-btn:active{background:rgba(56,189,248,0.2);transform:scale(0.92)}
-        .btn-arrow{width:calc(90px * var(--gs));height:calc(90px * var(--gs));font-size:calc(2.5rem * var(--gs));color:rgba(56,189,248,0.2)}
-        .btn-jump{width:calc(120px * var(--gs));height:calc(120px * var(--gs));border-radius:50%;border-width:2px;border-color:rgba(56,189,248,0.15)}
-        .btn-label{font-family:'Orbitron',sans-serif;font-size:11px;text-transform:uppercase;color:rgba(255,255,255,0.1);letter-spacing:2px}
-        .btn-menu{width:calc(220px * var(--gs));padding:calc(18px * var(--gs));margin:calc(10px * var(--gs));border-radius:calc(12px * var(--gs));font-size:calc(14px * var(--gs));font-weight:900;text-transform:uppercase;letter-spacing:2px;border:none;box-shadow:0 5px 0 rgba(0,0,0,0.3);cursor:pointer;pointer-events:auto}
-        .hud-box{background:rgba(30,41,59,0.3);padding:calc(8px * var(--gs)) calc(16px * var(--gs));border-radius:calc(12px * var(--gs));border:1px solid rgba(56,189,248,0.1);backdrop-filter:blur(2px);font-size:calc(14px * var(--gs))}
+        .btn-arrow{width:clamp(50px,18vh,90px);height:clamp(50px,18vh,90px);font-size:clamp(1.2rem,5vh,2.5rem);color:rgba(56,189,248,0.2)}
+        .btn-jump{width:clamp(60px,22vh,120px);height:clamp(60px,22vh,120px);border-radius:50%;border-width:2px;border-color:rgba(56,189,248,0.15)}
+        .btn-label{font-family:'Orbitron',sans-serif;font-size:clamp(8px,2vh,11px);text-transform:uppercase;color:rgba(255,255,255,0.1);letter-spacing:2px}
+        .btn-menu{width:clamp(120px,28vw,220px);padding:clamp(8px,2.5vh,18px);margin:clamp(4px,1vh,10px);border-radius:clamp(6px,1.5vh,12px);font-size:clamp(10px,2.2vh,14px);font-weight:900;text-transform:uppercase;letter-spacing:1px;border:none;box-shadow:0 3px 0 rgba(0,0,0,0.3);cursor:pointer;pointer-events:auto}
+        .hud-box{background:rgba(30,41,59,0.3);padding:clamp(4px,1.2vh,8px) clamp(8px,2vh,16px);border-radius:clamp(6px,1.5vh,12px);border:1px solid rgba(56,189,248,0.1);backdrop-filter:blur(2px);font-size:clamp(10px,2vh,14px)}
         #fs-toggle{position:fixed;top:15px;right:20px;z-index:200;width:45px;height:45px;background:rgba(30,41,59,0.3);border:1px solid rgba(56,189,248,0.1);border-radius:8px;color:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer}
         body.native-app #fs-toggle{display:none!important}
-        .shop-item{background:rgba(30,41,59,0.5);border:2px solid rgba(56,189,248,0.2);border-radius:calc(16px * var(--gs));padding:calc(12px * var(--gs));cursor:pointer;transition:all .2s;min-width:calc(80px * var(--gs));text-align:center;font-size:calc(13px * var(--gs))}
+        .shop-item{background:rgba(30,41,59,0.5);border:2px solid rgba(56,189,248,0.2);border-radius:clamp(8px,2vh,16px);padding:clamp(6px,1.5vh,12px);cursor:pointer;transition:all .2s;min-width:clamp(50px,12vw,80px);text-align:center;font-size:clamp(10px,2vh,13px)}
         .shop-item:hover{border-color:rgba(56,189,248,0.5);transform:scale(1.03)}
         .shop-item.owned{border-color:#10b981;background:rgba(16,185,129,0.1)}
         .shop-item.equipped{border-color:#fbbf24;background:rgba(251,191,36,0.15);box-shadow:0 0 20px rgba(251,191,36,0.3)}
         .shop-item.cant-afford{opacity:0.5}
         .coin-display{background:linear-gradient(135deg,rgba(251,191,36,0.2),rgba(245,158,11,0.2));border:1px solid rgba(251,191,36,0.4)}
         .badge{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center}
-        .leaderboard-tabs{display:flex;gap:6px;margin-bottom:12px}
-        .leaderboard-tab{padding:calc(8px * var(--gs)) calc(16px * var(--gs));border-radius:calc(8px * var(--gs));font-size:calc(12px * var(--gs));font-weight:700;text-transform:uppercase;background:rgba(30,41,59,0.5);border:1px solid rgba(56,189,248,0.2);color:#94a3b8;transition:all .2s;cursor:pointer}
-        .leaderboard-tab.active{background:rgba(56,189,248,0.2);border-color:#38bdf8;color:#38bdf8}
-        .leaderboard-table{width:100%;border-collapse:collapse}
-        .leaderboard-table th{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#64748b;padding:8px 6px;text-align:left}
-        .leaderboard-table td{padding:10px 6px;border-bottom:1px solid rgba(30,41,59,0.5);font-size:13px}
-        .leaderboard-table tr:nth-child(1) td{color:#fbbf24}
-        .leaderboard-table tr:nth-child(2) td{color:#94a3b8}
-        .leaderboard-table tr:nth-child(3) td{color:#cd7c2e}
-        .leaderboard-table tr.my-entry td{border:2px solid #38bdf8;border-radius:8px;background:rgba(56,189,248,0.1)}
+        .diff-label{font-size:clamp(8px,1.6vh,12px);text-transform:uppercase;font-weight:700}
+        .leaderboard-tabs{display:flex;gap:clamp(4px,1vw,8px);margin-bottom:clamp(6px,2vh,12px)}
+        .leaderboard-tab{padding:clamp(5px,1.5vh,10px) clamp(8px,2vw,18px);border-radius:clamp(6px,1.2vh,10px);font-size:clamp(10px,2vh,13px);font-weight:700;text-transform:uppercase;background:rgba(30,41,59,0.5);border:1px solid rgba(56,189,248,0.2);color:#94a3b8;transition:all .2s;cursor:pointer}
+        .leaderboard-tab.active{background:linear-gradient(135deg,rgba(56,189,248,0.3),rgba(139,92,246,0.2));border-color:#38bdf8;color:#38bdf8;box-shadow:0 0 12px rgba(56,189,248,0.3)}
+        .leaderboard-table{width:100%;border-collapse:separate;border-spacing:0 4px}
+        .leaderboard-table th{font-size:clamp(8px,1.8vh,11px);text-transform:uppercase;letter-spacing:1px;color:#64748b;padding:clamp(4px,1vh,8px) 6px;text-align:left}
+        .leaderboard-table td{padding:clamp(6px,1.5vh,10px) 6px;font-size:clamp(11px,2vh,14px)}
+        .leaderboard-table tr{background:rgba(30,41,59,0.3);border-radius:8px}
+        .leaderboard-table tr:nth-child(1){background:linear-gradient(90deg,rgba(251,191,36,0.15),transparent)}
+        .leaderboard-table tr:nth-child(1) td{color:#fbbf24;font-weight:900}
+        .leaderboard-table tr:nth-child(2){background:linear-gradient(90deg,rgba(148,163,184,0.1),transparent)}
+        .leaderboard-table tr:nth-child(2) td{color:#94a3b8;font-weight:700}
+        .leaderboard-table tr:nth-child(3){background:linear-gradient(90deg,rgba(205,124,46,0.1),transparent)}
+        .leaderboard-table tr:nth-child(3) td{color:#cd7c2e;font-weight:700}
+        .leaderboard-table tr.my-entry{border:2px solid #38bdf8;background:rgba(56,189,248,0.1);box-shadow:0 0 15px rgba(56,189,248,0.2)}
         .rank-cell{font-family:'Orbitron',sans-serif;font-weight:900;min-width:32px}
         .name-cell{max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
         .score-cell{font-family:'Orbitron',sans-serif;font-weight:700}
@@ -71,20 +76,22 @@
     </button>
     <div id="ui-layer" class="ui-layer">
         <div id="menu-start" class="menu-box">
-            <div class="flex items-center justify-center mb-1">
-                <span id="menu-nickname" class="text-sm text-slate-400 font-bold">Hey Gamer 👋</span>
+            <div class="flex items-center justify-center" style="margin-bottom:clamp(2px,0.8vh,6px)">
+                <span id="menu-nickname" class="text-slate-400 font-bold" style="font-size:clamp(10px,2vh,14px)">Hey Gamer 👋</span>
                 <button class="nickname-edit-btn" onclick="window.gameControl.editNickname()">✏️</button>
             </div>
-            <h1 class="text-3xl md:text-5xl font-game font-black mb-1 italic uppercase tracking-tighter text-center">LOGAN'S <span class="text-sky-500">GEOMETRIE</span> CRASH</h1>
-            <p class="text-slate-500 mb-4 text-xs tracking-widest uppercase font-bold text-center">Haptic Edition v6.10</p>
-            <div class="coin-display flex items-center gap-2 mb-6 px-5 py-2 rounded-full"><span class="text-2xl">⚽</span><span class="text-xl font-game font-bold text-amber-400" id="menu-coins">0</span></div>
+            <h1 class="font-game font-black italic uppercase tracking-tighter text-center" style="font-size:clamp(1.2rem,5vh,2.5rem);margin-bottom:2px">LOGAN'S <span class="text-sky-500">GEOMETRIE</span> CRASH</h1>
+            <p class="text-slate-500 text-center uppercase font-bold" style="font-size:clamp(7px,1.5vh,11px);letter-spacing:3px;margin-bottom:clamp(4px,2vh,16px)">⚡ Haptic Edition v6.10</p>
+            <div class="coin-display flex items-center gap-2 rounded-full" style="padding:clamp(4px,1vh,8px) clamp(12px,3vw,20px);margin-bottom:clamp(4px,2vh,12px)"><span style="font-size:clamp(14px,3vh,24px)">⚽</span><span class="font-game font-bold text-amber-400" style="font-size:clamp(12px,3vh,20px)" id="menu-coins">0</span></div>
             <div class="flex flex-row flex-wrap justify-center">
-                <div class="flex flex-col items-center"><button class="btn-menu bg-emerald-500 text-white font-game" onclick="window.gameControl.start('leicht')">Leicht</button><span class="text-xs text-emerald-400 uppercase font-bold" id="hs-leicht">Best: 0</span></div>
-                <div class="flex flex-col items-center"><button class="btn-menu bg-amber-500 text-white font-game" onclick="window.gameControl.start('mittel')">Mittel</button><span class="text-xs text-amber-400 uppercase font-bold" id="hs-mittel">Best: 0</span></div>
-                <div class="flex flex-col items-center"><button class="btn-menu bg-rose-500 text-white font-game" onclick="window.gameControl.start('schwer')">Schwer</button><span class="text-xs text-rose-400 uppercase font-bold" id="hs-schwer">Best: 0</span></div>
+                <div class="flex flex-col items-center"><button class="btn-menu bg-emerald-500 text-white font-game" onclick="window.gameControl.start('leicht')">🟢 Chill</button><span class="diff-label text-emerald-400" id="hs-leicht">Best: 0</span></div>
+                <div class="flex flex-col items-center"><button class="btn-menu bg-amber-500 text-white font-game" onclick="window.gameControl.start('mittel')">🔥 Grind</button><span class="diff-label text-amber-400" id="hs-mittel">Best: 0</span></div>
+                <div class="flex flex-col items-center"><button class="btn-menu bg-rose-500 text-white font-game" onclick="window.gameControl.start('schwer')">💀 Beast</button><span class="diff-label text-rose-400" id="hs-schwer">Best: 0</span></div>
             </div>
-            <button class="btn-menu bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-game mt-6" onclick="window.gameControl.openShop()">🛒 Shop</button>
-            <button class="btn-menu bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-game" onclick="window.gameControl.openLeaderboard()">🏆 Rangliste</button>
+            <div class="flex flex-row gap-2" style="margin-top:clamp(4px,2vh,12px)">
+                <button class="btn-menu bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-game" onclick="window.gameControl.openShop()">🛒 Shop</button>
+                <button class="btn-menu bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-game" onclick="window.gameControl.openLeaderboard()">🏆 Hall of Fame</button>
+            </div>
         </div>
         <div id="menu-shop" class="menu-box" style="display:none">
             <h2 class="text-3xl font-game font-black text-amber-400 mb-2 italic uppercase">🏪 Logan's Shop</h2>
@@ -104,25 +111,25 @@
             <button class="btn-menu bg-sky-600 text-white font-game shadow-none mt-4" onclick="window.gameControl.home()">Zurück</button>
         </div>
         <div id="menu-crash" class="menu-box" style="display:none">
-            <h2 class="text-4xl font-game font-black text-rose-500 mb-2 italic uppercase text-center">💥 Crash!</h2>
-            <div class="text-6xl font-game font-black text-white mb-2" id="final-score">0</div>
-            <div class="coin-display flex items-center gap-2 mb-4 px-4 py-2 rounded-full"><span class="text-lg">+⚽</span><span class="text-lg font-game font-bold text-amber-400" id="session-coins">0</span></div>
+            <h2 class="font-game font-black text-rose-500 italic uppercase text-center" style="font-size:clamp(1.2rem,5vh,2.5rem);margin-bottom:clamp(2px,1vh,8px)">💥 Crash!</h2>
+            <div class="font-game font-black text-white" style="font-size:clamp(2rem,8vh,4rem);margin-bottom:clamp(2px,1vh,8px)" id="final-score">0</div>
+            <div class="coin-display flex items-center gap-2 rounded-full" style="padding:clamp(4px,1vh,8px) clamp(10px,2vw,16px);margin-bottom:clamp(4px,1.5vh,16px)"><span style="font-size:clamp(12px,2.5vh,18px)">+⚽</span><span class="font-game font-bold text-amber-400" style="font-size:clamp(12px,2.5vh,18px)" id="session-coins">0</span></div>
             <div class="text-sky-400 text-xs font-bold uppercase mb-6 tracking-widest" id="new-record-msg" style="display:none">🎉 NEUER REKORD!</div>
             <div class="text-amber-400 text-lg font-bold mb-4" id="rank-msg" style="display:none"></div>
             <div class="flex flex-row space-x-4">
                 <button class="btn-menu bg-sky-500 text-slate-950 font-game shadow-none" onclick="window.gameControl.start(window.currentDiff)">Nochmal</button>
-                <button class="btn-menu bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-game shadow-none" onclick="window.gameControl.openLeaderboard()">📊 Rangliste</button>
+                <button class="btn-menu bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-game shadow-none" onclick="window.gameControl.openLeaderboard()">🏆 Hall of Fame</button>
             </div>
             <button class="btn-menu bg-white text-slate-950 font-game shadow-none mt-4" onclick="window.gameControl.home()">Menü</button>
         </div>
         <div id="menu-leaderboard" class="menu-box" style="display:none">
-            <h2 class="text-3xl font-game font-black text-amber-400 mb-2 italic uppercase">🏆 Rangliste</h2>
+            <h2 class="font-game font-black italic uppercase text-center" style="font-size:clamp(1rem,4vh,2rem);margin-bottom:clamp(2px,1vh,8px);background:linear-gradient(90deg,#fbbf24,#f97316,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent">🏆 HALL OF FAME</h2>
             <div class="w-full max-w-lg">
                 <div class="leaderboard-tabs" id="leaderboard-tabs">
-                    <button class="leaderboard-tab active" data-diff="all">Alle</button>
-                    <button class="leaderboard-tab" data-diff="leicht">Leicht</button>
-                    <button class="leaderboard-tab" data-diff="mittel">Mittel</button>
-                    <button class="leaderboard-tab" data-diff="schwer">Schwer</button>
+                    <button class="leaderboard-tab active" data-diff="all">🌍 Alle</button>
+                    <button class="leaderboard-tab" data-diff="leicht">🟢 Chill</button>
+                    <button class="leaderboard-tab" data-diff="mittel">🔥 Grind</button>
+                    <button class="leaderboard-tab" data-diff="schwer">💀 Beast</button>
                 </div>
                 <div class="overflow-y-auto" style="max-height:50vh">
                     <table class="leaderboard-table">
@@ -134,10 +141,10 @@
             <button class="btn-menu bg-sky-600 text-white font-game shadow-none mt-6" onclick="window.gameControl.home()">Zurück</button>
         </div>
     </div>
-    <div id="hud" class="fixed top-4 left-6 flex space-x-3 z-[120] pointer-events-none" style="display:none">
-        <div class="hud-box"><div class="text-xs text-sky-400 uppercase font-black">Score</div><div class="text-2xl font-black font-game leading-tight" id="live-score">0</div></div>
-        <div class="hud-box coin-display"><div class="text-xs text-amber-400 uppercase font-black">⚽</div><div class="text-lg font-bold font-game leading-tight text-amber-400" id="live-coins">0</div></div>
-        <div class="hud-box text-right"><div class="text-xs text-slate-400 uppercase font-black">Best (<span id="hud-mode-name">-</span>)</div><div class="text-xl font-bold font-game leading-tight" id="hud-best">0</div></div>
+    <div id="hud" class="fixed flex z-[120] pointer-events-none" style="display:none;top:clamp(4px,1.5vh,16px);left:clamp(6px,1.5vw,24px);gap:clamp(4px,1vw,12px)">
+        <div class="hud-box"><div style="font-size:clamp(7px,1.5vh,10px)" class="text-sky-400 uppercase font-black">Score</div><div class="font-black font-game leading-tight" style="font-size:clamp(12px,3.5vh,24px)" id="live-score">0</div></div>
+        <div class="hud-box coin-display"><div style="font-size:clamp(7px,1.5vh,10px)" class="text-amber-400 uppercase font-black">⚽</div><div class="font-bold font-game leading-tight text-amber-400" style="font-size:clamp(10px,2.8vh,18px)" id="live-coins">0</div></div>
+        <div class="hud-box text-right"><div style="font-size:clamp(7px,1.5vh,10px)" class="text-slate-400 uppercase font-black">Best (<span id="hud-mode-name">-</span>)</div><div class="font-bold font-game leading-tight" style="font-size:clamp(10px,3vh,20px)" id="hud-best">0</div></div>
     </div>
     <div id="powerup-display" class="fixed top-4 left-1/2 transform -translate-x-1/2 z-[130] pointer-events-none text-3xl" style="display:none;opacity:0.72"></div>
     <canvas id="powerupCanvas" class="fixed z-[131] pointer-events-none" width="90" height="90" style="display:none;left:50%;transform:translateX(-50%);"></canvas>
@@ -261,7 +268,7 @@ async function updateNicknameDisplay(){ui.menuNickname.innerText='Hallo '+(cache
 async function getLeaderboardEntries(){const v=await prefGet(PREF_KEYS.leaderboard);if(!v)return[];try{return JSON.parse(v);}catch{return[];}}
 async function saveLeaderboardEntries(entries){await prefSet(PREF_KEYS.leaderboard,JSON.stringify(entries));}
 async function saveToLeaderboard(score,difficulty){const name=cache.nickname||'Spieler';const entries=await getLeaderboardEntries();const newEntry={id:Date.now(),nickname:name,score:score,difficulty:difficulty,date:new Date().toISOString().split('T')[0]};entries.push(newEntry);entries.sort((a,b)=>b.score-a.score);const top100=entries.slice(0,100);await saveLeaderboardEntries(top100);return top100.findIndex(e=>e.id===newEntry.id)+1;}
-async function renderLeaderboard(diff){const entries=await getLeaderboardEntries();let filtered=diff==='all'?entries:entries.filter(e=>e.difficulty===diff);filtered=filtered.slice(0,20);const tbody=document.getElementById('leaderboard-tbody');tbody.innerHTML='';filtered.forEach((e,i)=>{const rank=i+1;const isMe=cache.nickname&&e.nickname===cache.nickname;const diffClass='diff-'+e.difficulty;const tr=document.createElement('tr');if(isMe)tr.className='my-entry';tr.innerHTML='<td class="rank-cell">'+rank+'</td><td class="name-cell">'+e.nickname+'</td><td class="score-cell">'+e.score+'</td><td><span class="diff-badge '+diffClass+'">'+e.difficulty+'</span></td><td class="text-slate-500">'+e.date+'</td>';tbody.appendChild(tr)});if(filtered.length===0){const tr=document.createElement('tr');tr.innerHTML='<td colspan="5" class="text-center text-slate-500 py-8">Noch keine Einträge</td>';tbody.appendChild(tr);}}
+async function renderLeaderboard(diff){var medals=['👑','🥈','🥉'];var diffNames={leicht:'Chill',mittel:'Grind',schwer:'Beast'};var entries=await getLeaderboardEntries();var filtered=diff==='all'?entries:entries.filter(function(e){return e.difficulty===diff});filtered=filtered.slice(0,20);var tbody=document.getElementById('leaderboard-tbody');tbody.innerHTML='';filtered.forEach(function(e,i){var rank=i+1;var isMe=cache.nickname&&e.nickname===cache.nickname;var diffClass='diff-'+e.difficulty;var tr=document.createElement('tr');if(isMe)tr.className='my-entry';var rankDisplay=rank<=3?medals[rank-1]:'#'+rank;var dName=diffNames[e.difficulty]||e.difficulty;tr.innerHTML='<td class="rank-cell" style="font-size:clamp(14px,3vh,22px)">'+rankDisplay+'</td><td class="name-cell font-game" style="font-weight:700">'+e.nickname+'</td><td class="score-cell font-game" style="color:#38bdf8;font-weight:900">'+e.score+'</td><td><span class="diff-badge '+diffClass+'">'+dName+'</span></td><td class="text-slate-500" style="font-size:clamp(9px,1.6vh,12px)">'+e.date+'</td>';tbody.appendChild(tr)});if(filtered.length===0){var tr=document.createElement('tr');tr.innerHTML='<td colspan="5" class="text-center text-slate-500 py-8">Noch keine Runs 💤</td>';tbody.appendChild(tr);}}
 
 // Init cache from storage
 async function initCache(){console.log('initCache starting...');try{const cv=await prefGet(PREF_KEYS.coins);cache.coins=parseInt(cv||'0');console.log('coins loaded:', cache.coins);}catch(e){console.error('Error loading coins:', e);cache.coins=0}try{const sv=await prefGet(PREF_KEYS.skins);cache.ownedSkins=JSON.parse(sv||'["default"]');console.log('skins loaded:', cache.ownedSkins.length);}catch(e){console.error('Error loading skins:', e);cache.ownedSkins=['default']}try{const tv=await prefGet(PREF_KEYS.trails);cache.ownedTrails=JSON.parse(tv||'["default"]');console.log('trails loaded:', cache.ownedTrails.length);}catch(e){console.error('Error loading trails:', e);cache.ownedTrails=['default']}try{const es=await prefGet(PREF_KEYS.equippedSkin);cache.equippedSkin=es||'default';console.log('equippedSkin:', cache.equippedSkin);}catch(e){console.error('Error loading equippedSkin:', e);cache.equippedSkin='default'}try{const et=await prefGet(PREF_KEYS.equippedTrail);cache.equippedTrail=et||'default';console.log('equippedTrail:', cache.equippedTrail);}catch(e){console.error('Error loading equippedTrail:', e);cache.equippedTrail='default'}try{const hl=await prefGet(PREF_KEYS.hsLeicht);cache.hs.leicht=parseInt(hl||'0');console.log('hs leicht:', cache.hs.leicht);}catch(e){console.error('Error loading hsLeicht:', e);cache.hs.leicht=0}try{const hm=await prefGet(PREF_KEYS.hsMittel);cache.hs.mittel=parseInt(hm||'0');console.log('hs mittel:', cache.hs.mittel);}catch(e){console.error('Error loading hsMittel:', e);cache.hs.mittel=0}try{const hs=await prefGet(PREF_KEYS.hsSchwer);cache.hs.schwer=parseInt(hs||'0');console.log('hs schwer:', cache.hs.schwer);}catch(e){console.error('Error loading hsSchwer:', e);cache.hs.schwer=0}try{const nn=await prefGet(PREF_KEYS.nickname);cache.nickname=nn;console.log('nickname:', cache.nickname);}catch(e){console.error('Error loading nickname:', e);cache.nickname=null}
@@ -430,7 +437,7 @@ document.documentElement.style.setProperty('--gs',gameScale);
 // Scale player to match reference world
 player.size=Math.round(38*gameScale);
 player.ground=ch-Math.max(50,Math.round(ch*0.07));if(!active){player.x=cw/2-player.size/2;player.y=player.ground}initStars();positionControls()}
-function positionControls(){ui.controls.style.bottom=Math.round(60*gameScale)+'px'}
+function positionControls(){ui.controls.style.bottom='8vh'}
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',()=>setTimeout(resize,100));window.visualViewport&&window.visualViewport.addEventListener('resize',()=>setTimeout(resize,100));
 resize();
 
@@ -440,7 +447,7 @@ window.addEventListener('keyup',e=>{switch(e.code){case'ArrowLeft':case'KeyA':in
 const bind=(id,key)=>{const el=document.getElementById(id);el.addEventListener('touchstart',(e)=>{e.preventDefault();initAudio();input[key]=true;if(key==='J')triggerJump()},{passive:false});el.addEventListener('touchend',(e)=>{e.preventDefault();input[key]=false},{passive:false})};
 bind('btn-L','L');bind('btn-R','R');bind('btn-J','J');
 
-window.gameControl={start:(d)=>{console.log('gameControl.start called with difficulty:', d);initAudio();window.currentDiff=d;const s=settings[d];player.jP=s.jP*gameScale;player.g=s.g*gameScale;player.speed=s.speed*gameScale;score=0;sessionCoins=0;spawnAccumulator=0;sideAccumulator=0;powerupAccumulator=0;coinAccumulator=0;comboCount=0;comboTimer=0;jumpClearedCount=0;clearedEnemiesThisJump=[];activePowerup=null;enemies=[];sides=[];fx=[];coins=[];powerups=[];trailParticles=[];ui.live.innerText="0";ui.liveCoins.innerText="0";ui.hudBest.innerText=getHSSync(d);ui.hudMode.innerText=d.toUpperCase();ui.start.style.display='none';ui.shop.style.display='none';ui.crash.style.display='none';ui.newRecord.style.display='none';ui.hud.style.display='flex';ui.controls.style.display='flex';document.getElementById('powerupCanvas').style.display='none';active=true;player.x=cw/2-player.size/2;player.y=player.ground;player.vy=0;player.jumping=false;player.trail=[];lastTime=0;firstSpawn=true;startMusic()},home:()=>{active=false;stopMusic();ui.crash.style.display='none';ui.shop.style.display='none';ui.leaderboard.style.display='none';ui.hud.style.display='none';ui.controls.style.display='none';ui.start.style.display='flex';refreshHSDisplay();ui.menuCoins.innerText=getCoinsSync()},openShop:()=>{renderShop();ui.start.style.display='none';ui.shop.style.display='flex'},openLeaderboard:()=>{renderLeaderboard('all');ui.start.style.display='none';ui.shop.style.display='none';ui.crash.style.display='none';ui.leaderboard.style.display='flex'},editNickname:()=>{var ni=document.getElementById('nickname-input');ni.value=cache.nickname||'';document.getElementById('nickname-modal').style.display='flex';setTimeout(function(){ni.focus();ni.click()},100)},saveNickname:()=>{const name=document.getElementById('nickname-input').value.trim()||'Spieler';setNickname(name);updateNicknameDisplay();document.getElementById('nickname-modal').style.display='none'},cancelNickname:()=>{document.getElementById('nickname-modal').style.display='none'},toggleFullscreen:()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});else document.exitFullscreen()}};
+window.gameControl={start:(d)=>{console.log('gameControl.start called with difficulty:', d);initAudio();window.currentDiff=d;const s=settings[d];player.jP=s.jP*gameScale;player.g=s.g*gameScale;player.speed=s.speed*gameScale;score=0;sessionCoins=0;spawnAccumulator=0;sideAccumulator=0;powerupAccumulator=0;coinAccumulator=0;comboCount=0;comboTimer=0;jumpClearedCount=0;clearedEnemiesThisJump=[];activePowerup=null;enemies=[];sides=[];fx=[];coins=[];powerups=[];trailParticles=[];ui.live.innerText="0";ui.liveCoins.innerText="0";ui.hudBest.innerText=getHSSync(d);var modeNames={leicht:'CHILL',mittel:'GRIND',schwer:'BEAST'};ui.hudMode.innerText=modeNames[d]||d.toUpperCase();ui.start.style.display='none';ui.shop.style.display='none';ui.crash.style.display='none';ui.newRecord.style.display='none';ui.hud.style.display='flex';ui.controls.style.display='flex';document.getElementById('powerupCanvas').style.display='none';active=true;player.x=cw/2-player.size/2;player.y=player.ground;player.vy=0;player.jumping=false;player.trail=[];lastTime=0;firstSpawn=true;startMusic()},home:()=>{active=false;stopMusic();ui.crash.style.display='none';ui.shop.style.display='none';ui.leaderboard.style.display='none';ui.hud.style.display='none';ui.controls.style.display='none';ui.start.style.display='flex';refreshHSDisplay();ui.menuCoins.innerText=getCoinsSync()},openShop:()=>{renderShop();ui.start.style.display='none';ui.shop.style.display='flex'},openLeaderboard:()=>{renderLeaderboard('all');ui.start.style.display='none';ui.shop.style.display='none';ui.crash.style.display='none';ui.leaderboard.style.display='flex'},editNickname:()=>{var ni=document.getElementById('nickname-input');ni.value=cache.nickname||'';document.getElementById('nickname-modal').style.display='flex';setTimeout(function(){ni.focus();ni.click()},100)},saveNickname:()=>{const name=document.getElementById('nickname-input').value.trim()||'Spieler';setNickname(name);updateNicknameDisplay();document.getElementById('nickname-modal').style.display='none'},cancelNickname:()=>{document.getElementById('nickname-modal').style.display='none'},toggleFullscreen:()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});else document.exitFullscreen()}};
 console.log('window.gameControl defined:', !!window.gameControl);
 
 const COMBO_WINDOW=1500;
