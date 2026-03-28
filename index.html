@@ -147,11 +147,45 @@
     <canvas id="gameCanvas"></canvas>
 <script>
 (function(){
-const isNativeApp=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
-if(isNativeApp)document.body.classList.add('native-app');
-const canvas=document.getElementById('gameCanvas');
-const ctx=canvas.getContext('2d');
-const Preferences=window.Capacitor?window.Capacitor.Plugins.Preferences:null;
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', function() {
+// Native detection - use deviceready event for reliable Capacitor detection
+function detectNative() {
+    // Check multiple Capacitor detection methods
+    const hasCapacitor = !!(window.Capacitor);
+    const isNativePlatform = hasCapacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform();
+    const platform = hasCapacitor && typeof window.Capacitor.getPlatform === 'function' ? window.Capacitor.getPlatform() : null;
+    const isNative = isNativePlatform || platform === 'android' || platform === 'ios';
+    
+    if (isNative) {
+        document.body.classList.add('native-app');
+        console.log('Native app detected, hiding fullscreen button', { isNativePlatform, platform });
+    }
+}
+
+// Listen for Capacitor's deviceready event for reliable native detection
+if (window.Capacitor) {
+    document.addEventListener('deviceready', detectNative);
+    // Fallback: also try immediately and with delays
+    detectNative();
+    setTimeout(detectNative, 300);
+    setTimeout(detectNative, 800);
+} else {
+    // No Capacitor - web browser
+    detectNative();
+}
+
+const canvas = document.getElementById('gameCanvas');
+if (!canvas) {
+    console.error('Canvas element not found!');
+    return;
+}
+const ctx = canvas.getContext('2d');
+if (!ctx) {
+    console.error('Could not get canvas context!');
+    return;
+}
+const Preferences = window.Capacitor ? window.Capacitor.Plugins?.Preferences : null;
 const PREF_KEYS={coins:'logans_crash_coins',skins:'logans_crash_skins',trails:'logans_crash_trails',equippedSkin:'logans_crash_equipped_skin',equippedTrail:'logans_crash_equipped_trail',hsLeicht:'logans_crash_hs_leicht',hsMittel:'logans_crash_hs_mittel',hsSchwer:'logans_crash_hs_schwer',nickname:'logans_crash_nickname',leaderboard:'logans_crash_leaderboard'};
 async function prefGet(key){if(!Preferences)return localStorage.getItem(key)||null;const r=await Preferences.get({key});return r.value;}
 async function prefSet(key,value){if(!Preferences)return localStorage.setItem(key,value),void 0;await Preferences.set({key,value});}
@@ -235,18 +269,18 @@ let shakeIntensity=0,shakeX=0,shakeY=0;
 let stars=[],rainbowHue=0;
 const input={L:false,R:false,J:false};
 const ui={
-start:document.getElementById('menu-start'),shop:document.getElementById('menu-shop'),
-crash:document.getElementById('menu-crash'),controls:document.getElementById('controls'),
-hud:document.getElementById('hud'),live:document.getElementById('live-score'),
-liveCoins:document.getElementById('live-coins'),final:document.getElementById('final-score'),
-sessionCoins:document.getElementById('session-coins'),hudBest:document.getElementById('hud-best'),
-hudMode:document.getElementById('hud-mode-name'),newRecord:document.getElementById('new-record-msg'),
-menuCoins:document.getElementById('menu-coins'),shopCoins:document.getElementById('shop-coins'),
-powerupDisplay:document.getElementById('powerup-display'),
-hsLabels:{leicht:document.getElementById('hs-leicht'),mittel:document.getElementById('hs-mittel'),schwer:document.getElementById('hs-schwer')},
-menuNickname:document.getElementById('menu-nickname'),
-rankMsg:document.getElementById('rank-msg'),
-leaderboard:document.getElementById('menu-leaderboard')
+start:getElement('menu-start'),shop:getElement('menu-shop'),
+crash:getElement('menu-crash'),controls:getElement('controls'),
+hud:getElement('hud'),live:getElement('live-score'),
+liveCoins:getElement('live-coins'),final:getElement('final-score'),
+sessionCoins:getElement('session-coins'),hudBest:getElement('hud-best'),
+hudMode:getElement('hud-mode-name'),newRecord:getElement('new-record-msg'),
+menuCoins:getElement('menu-coins'),shopCoins:getElement('shop-coins'),
+powerupDisplay:getElement('powerup-display'),
+hsLabels:{leicht:getElement('hs-leicht'),mittel:getElement('hs-mittel'),schwer:getElement('hs-schwer')},
+menuNickname:getElement('menu-nickname'),
+rankMsg:getElement('rank-msg'),
+leaderboard:getElement('menu-leaderboard')
 };
 const settings={
 leicht:{jP:-12.5,spawnMs:1450,sideMs:4000,powerupMs:8000,coinMs:3500,g:0.38,speed:9.0,color:'#10b981'},
@@ -256,6 +290,15 @@ schwer:{jP:-10.5,spawnMs:750,sideMs:2200,powerupMs:4500,coinMs:2200,g:0.50,speed
 const player={x:0,y:0,size:38,vy:0,g:0.42,jP:-12,ground:0,speed:9,jumping:false,trail:[]};
 let enemies=[],sides=[],fx=[],coins=[],powerups=[];
 let firstSpawn=true;
+
+// Safe UI element getter
+function getElement(id) {
+    const el = document.getElementById(id);
+    if (!el) {
+        console.warn('Element not found:', id);
+    }
+    return el;
+}
 
 function svgBadgeCheck(){return'<svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="11" fill="#10b981"/><polyline points="6,11 10,15 16,7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>'}
 function svgBadgeStar(){return'<svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="11" fill="#fbbf24"/><polygon points="11,3 13.1,8.5 19,8.5 14.3,12.2 16.1,18 11,14.3 5.9,18 7.7,12.2 3,8.5 8.9,8.5" fill="#020617"/></svg>'}
@@ -414,7 +457,7 @@ function activatePowerup(type){activePowerup=type;powerupEndTime=Date.now()+7000
 
 
 
-function drawPowerupSymbol(canvas,type){const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);const cx=canvas.width/2,cy=canvas.height/2;const colors={shield:'#fbbf24',magnet:'#ef4444',slowmo:'#06b6d4'};const color=colors[type]||'#fff';const remaining=Math.max(0,powerupEndTime-Date.now());const progress=remaining/7000;const blink=remaining<=2000&&Math.floor(Date.now()/200)%2===0;ctx.globalAlpha=blink?0.3:1;ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=5;ctx.beginPath();ctx.arc(cx,cy,36,0,Math.PI*2);ctx.stroke();ctx.strokeStyle=color;ctx.lineWidth=5;ctx.lineCap='round';ctx.shadowBlur=10;ctx.shadowColor=color;ctx.beginPath();ctx.arc(cx,cy,36,-Math.PI/2,-Math.PI/2+progress*Math.PI*2,false);ctx.stroke();ctx.shadowBlur=0;ctx.globalAlpha=1}
+function drawPowerupSymbol(canvas,type){const pCtx=canvas.getContext('2d');if(!pCtx)return;pCtx.clearRect(0,0,canvas.width,canvas.height);const cx=canvas.width/2,cy=canvas.height/2;const colors={shield:'#fbbf24',magnet:'#ef4444',slowmo:'#06b6d4'};const color=colors[type]||'#fff';const remaining=Math.max(0,powerupEndTime-Date.now());const progress=remaining/7000;const blink=remaining<=2000&&Math.floor(Date.now()/200)%2===0;pCtx.globalAlpha=blink?0.3:1;pCtx.strokeStyle='rgba(255,255,255,0.1)';pCtx.lineWidth=5;pCtx.beginPath();pCtx.arc(cx,cy,36,0,Math.PI*2);pCtx.stroke();pCtx.strokeStyle=color;pCtx.lineWidth=5;pCtx.lineCap='round';pCtx.shadowBlur=10;pCtx.shadowColor=color;pCtx.beginPath();pCtx.arc(cx,cy,36,-Math.PI/2,-Math.PI/2+progress*Math.PI*2,false);pCtx.stroke();pCtx.shadowBlur=0;pCtx.globalAlpha=1}
 
 function update(dt){if(!active)return;const s=settings[window.currentDiff];const timeScale=activePowerup==='slowmo'?0.4:1;const scaledDt=dt*timeScale;if(firstSpawn){spawnEnemy();spawnCoin();spawnPowerup();spawnSide();firstSpawn=false;spawnAccumulator=0;sideAccumulator=0;powerupAccumulator=0;coinAccumulator=0}if(activePowerup&&Date.now()>powerupEndTime){activePowerup=null;ui.powerupDisplay.style.display='none';const pc=document.getElementById('powerupCanvas');if(pc)pc.style.display='none'}if(activePowerup){const pc=document.getElementById('powerupCanvas');if(pc){pc.style.display='block';pc.style.bottom=(ch-player.ground+30)+'px'}drawPowerupSymbol(pc,activePowerup)}if(input.L)player.x-=player.speed*scaledDt;if(input.R)player.x+=player.speed*scaledDt;player.x=Math.max(0,Math.min(cw-player.size,player.x));player.vy+=player.g*scaledDt;player.y+=player.vy*scaledDt;player.trail.push({x:player.x,y:player.y});if(player.trail.length>10)player.trail.shift();const eqTrail=getEquippedTrailData();if(eqTrail.type&&Math.random()<0.4){if(eqTrail.type==='stardust'){trailParticles.push({x:player.x+player.size/2+(Math.random()-0.5)*20,y:player.y+player.size/2+(Math.random()-0.5)*20,vx:(Math.random()-0.5)*1,vy:(Math.random()-0.5)*1,l:1.0,col:eqTrail.color,sz:2})}else if(eqTrail.type==='bubbles'){trailParticles.push({x:player.x+player.size/2+(Math.random()-0.5)*15,y:player.y+player.size/2,vx:(Math.random()-0.5)*0.5,vy:-1.5,l:1.2,col:eqTrail.color,sz:4+Math.random()*4})}else if(eqTrail.type==='sparks'){trailParticles.push({x:player.x+player.size/2+(Math.random()-0.5)*10,y:player.y,vx:(Math.random()-0.5)*2,vy:2+Math.random()*2,l:0.8,col:eqTrail.color,sz:2})}else if(eqTrail.type==='lightning'){trailParticles.push({x:player.x+player.size/2,y:player.y+player.size/2,vx:(Math.random()-0.5)*3,vy:(Math.random()-0.5)*3,l:0.5,col:eqTrail.color,sz:2})}else if(eqTrail.type==='hearts'){trailParticles.push({x:player.x+player.size/2+(Math.random()-0.5)*15,y:player.y+player.size/2,vx:(Math.random()-0.5)*1,vy:-1,l:1.0,col:eqTrail.color,sz:6})}}trailParticles=trailParticles.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.l-=0.025;return p.l>0});const msPerFrame=dt*16.66;spawnAccumulator+=msPerFrame;sideAccumulator+=msPerFrame;powerupAccumulator+=msPerFrame;coinAccumulator+=msPerFrame;if(spawnAccumulator>=s.spawnMs){spawnEnemy();spawnAccumulator=0}if(sideAccumulator>=s.sideMs){spawnSide();sideAccumulator=0}if(powerupAccumulator>=s.powerupMs){if(Math.random()>0.5)spawnPowerup();powerupAccumulator=0}if(coinAccumulator>=s.coinMs){spawnCoin();coinAccumulator=0}
 
@@ -459,11 +502,47 @@ ctx.globalAlpha=1;const skin=getEquippedSkinData();const glowColor=activePowerup
 ctx.restore()}
 
 function loop(now){if(!lastTime)lastTime=now;const delta=now-lastTime;lastTime=now;update(Math.min(delta/16.66,2.2));draw();requestAnimationFrame(loop)}
-// Init
-initCache().then(()=>{refreshHSDisplay();updateNicknameDisplay();if(!cache.nickname){setTimeout(()=>window.gameControl.editNickname(),500)}});
-// Leaderboard tabs
-document.getElementById('leaderboard-tabs').addEventListener('click',e=>{if(e.target.classList.contains('leaderboard-tab')){document.querySelectorAll('.leaderboard-tab').forEach(t=>t.classList.remove('active'));e.target.classList.add('active');renderLeaderboard(e.target.dataset.diff)}});
-requestAnimationFrame(loop);})();
+
+// Initialize everything after cache is ready
+let gameInitialized = false;
+function initializeGame() {
+    if (gameInitialized) return;
+    gameInitialized = true;
+    
+    // Set up leaderboard tabs IMMEDIATELY (not inside initCache promise)
+    // This ensures tabs work even before cache is loaded
+    const tabs = document.getElementById('leaderboard-tabs');
+    if (tabs) {
+        tabs.addEventListener('click', function(e) {
+            if (e.target.classList.contains('leaderboard-tab')) {
+                document.querySelectorAll('.leaderboard-tab').forEach(function(t) { t.classList.remove('active'); });
+                e.target.classList.add('active');
+                // renderLeaderboard is async but doesn't need cache to be ready
+                renderLeaderboard(e.target.dataset.diff);
+            }
+        });
+    }
+    
+    // Init cache first
+    initCache().then(function() {
+        refreshHSDisplay();
+        updateNicknameDisplay();
+        if (!cache.nickname) {
+            setTimeout(function() { window.gameControl.editNickname(); }, 500);
+        }
+        
+        // Start game loop
+        requestAnimationFrame(loop);
+    }).catch(function(err) {
+        console.error('Failed to initialize cache:', err);
+        // Fallback: start game loop anyway
+        requestAnimationFrame(loop);
+    });
+}
+
+// Start initialization
+initializeGame();
+}); // End of DOMContentLoaded
 </script>
     <div id="nickname-modal" class="nickname-modal" style="display:none">
         <div class="nickname-modal-box">
