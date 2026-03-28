@@ -189,8 +189,40 @@ if (!ctx) {
 }
 const Preferences = window.Capacitor ? window.Capacitor.Plugins?.Preferences : null;
 const PREF_KEYS={coins:'logans_crash_coins',skins:'logans_crash_skins',trails:'logans_crash_trails',equippedSkin:'logans_crash_equipped_skin',equippedTrail:'logans_crash_equipped_trail',hsLeicht:'logans_crash_hs_leicht',hsMittel:'logans_crash_hs_mittel',hsSchwer:'logans_crash_hs_schwer',nickname:'logans_crash_nickname',leaderboard:'logans_crash_leaderboard'};
-async function prefGet(key){if(!Preferences)return localStorage.getItem(key)||null;const r=await Preferences.get({key});return r.value;}
-async function prefSet(key,value){if(!Preferences)return localStorage.setItem(key,value),void 0;await Preferences.set({key,value});}
+async function prefGet(key){
+    console.log('prefGet called for key:', key);
+    if(!Preferences) {
+        console.log('No Preferences plugin, using localStorage');
+        return localStorage.getItem(key)||null;
+    }
+    try {
+        console.log('Calling Preferences.get for key:', key);
+        const r = await Preferences.get({key});
+        console.log('Preferences.get result:', r);
+        return r.value;
+    } catch(e) {
+        console.error('Error in Preferences.get:', e);
+        console.log('Falling back to localStorage');
+        return localStorage.getItem(key)||null;
+    }
+}
+async function prefSet(key,value){
+    console.log('prefSet called for key:', key, 'value:', value);
+    if(!Preferences) {
+        console.log('No Preferences plugin, using localStorage');
+        localStorage.setItem(key,value);
+        return;
+    }
+    try {
+        console.log('Calling Preferences.set for key:', key);
+        await Preferences.set({key,value});
+        console.log('Preferences.set succeeded');
+    } catch(e) {
+        console.error('Error in Preferences.set:', e);
+        console.log('Falling back to localStorage');
+        localStorage.setItem(key,value);
+    }
+}
 
 // Sync cache for game loop access
 let cache={coins:0,ownedSkins:['default'],ownedTrails:['default'],equippedSkin:'default',equippedTrail:'default',hs:{leicht:0,mittel:0,schwer:0},nickname:null};
