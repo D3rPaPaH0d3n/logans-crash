@@ -12,6 +12,12 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@400;900&display=swap');
         body{margin:0;padding:0;overflow:hidden;background:#020617;touch-action:none;font-family:'Inter',sans-serif;color:white;user-select:none;-webkit-user-select:none}
+        #game-flash{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle,#fff 0%,#ef4444 100%);opacity:0;pointer-events:none;z-index:999;animation:none}
+        #game-flash.active{animation:flashOut 0.6s ease-out forwards}
+        @keyframes flashOut{0%{opacity:0.9}100%{opacity:0}}
+        #game-over-overlay{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);font-family:'Orbitron',sans-serif;font-size:clamp(2.5rem,10vw,5rem);font-weight:900;color:#ef4444;text-shadow:0 0 20px #ef4444,0 0 40px #ef4444,0 0 60px #ef4444;z-index:998;opacity:0;pointer-events:none;white-space:nowrap}
+        #game-over-overlay.active{animation:gameOverAnim 1.2s ease-out forwards}
+        @keyframes gameOverAnim{0%{transform:translate(-50%,-50%) scale(0) rotate(-10deg);opacity:0}30%{transform:translate(-50%,-50%) scale(1.3) rotate(5deg);opacity:1}50%{transform:translate(-50%,-50%) scale(1) rotate(0deg)}70%{transform:translate(-50%,-50%) scale(1.05)}100%{transform:translate(-50%,-50%) scale(1);opacity:0.7}}
         #menu-shop{justify-content:flex-start;padding-top:max(32px,env(safe-area-inset-top,0px)+20px);padding-bottom:32px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
         #menu-shop .shop-section{width:min(100%,900px)}
         canvas{display:block;position:absolute;top:0;left:0;z-index:10}
@@ -66,6 +72,8 @@
     </style>
 </head>
 <body>
+    <div id="game-flash"></div>
+    <div id="game-over-overlay">GAME OVER</div>
     <div id="orientation-msg">
         <div class="text-sky-500 text-6xl mb-4 animate-pulse">↻</div>
         <h2 class="font-game text-xl uppercase italic">Bitte drehen</h2>
@@ -298,7 +306,7 @@ const SKINS=[
 {id:'austria',name:'🇦🇹 Österreich',color:'#ed2939',color2:'#fff',pattern:'h3stripe',price:20},
 {id:'brazil',name:'🇧🇷 Brasilien',color:'#fcd34d',color2:'#16a34a',pattern:'hstripe',price:20},
 {id:'argentina',name:'🇦🇷 Argentinien',color:'#7dd3fc',color2:'#fff',pattern:'vstripe',price:20},
-{id:'germany',name:'🇩🇪 Deutschland',color:'#000000',color2:'#dc2626',pattern:'h3stripe',price:20},
+{id:'germany',name:'🇩🇪 Deutschland',color:'#000000',color2:'#dc2626',color3:'#FFCC00',pattern:'h3stripe',price:20},
 {id:'spain',name:'🇪🇸 Spanien',color:'#dc2626',color2:'#fbbf24',pattern:'hstripe',price:20},
 {id:'france',name:'🇫🇷 Frankreich',color:'#3b82f6',color2:'#fff',pattern:'vstripe',price:20},
 {id:'italy',name:'🇮🇹 Italien',color:'#16a34a',color2:'#dc2626',pattern:'topstripe',price:20},
@@ -385,7 +393,7 @@ if(skin.color==='rainbow'){
 }else if(skin.pattern==='vstripe'){
   bgStyle='background:linear-gradient(to right,'+skin.color+' 50%,'+(skin.color2||skin.color)+' 50%)';
 }else if(skin.pattern==='h3stripe'){
-  bgStyle='background:linear-gradient(to bottom,'+skin.color+' 33%,'+(skin.color2||'#fff')+' 33%,'+(skin.color2||'#fff')+' 66%,'+skin.color+' 66%)';
+  if(skin.color3){bgStyle='background:linear-gradient(to bottom,'+skin.color+' 33%,'+skin.color2+' 33%,'+skin.color3+' 67%)';}else{bgStyle='background:linear-gradient(to bottom,'+skin.color+' 33%,'+(skin.color2||'#fff')+' 33%,'+(skin.color2||'#fff')+' 66%,'+skin.color+' 66%)';}
 }else if(skin.pattern==='topstripe'){
   bgStyle='background:linear-gradient(to bottom,'+skin.color+' 50%,'+(skin.color2||'#000')+' 50%)';
 }else if(skin.pattern==='solid_accent'){
@@ -556,7 +564,24 @@ function checkCoinHit(p,c){return p.x<c.x+c.size&&p.x+p.size>c.x&&p.y<c.y+c.size
 
 function drawPolygon(x,y,radius,sides,rotation){ctx.beginPath();for(let i=0;i<sides;i++){const angle=rotation+(i*2*Math.PI)/sides;const px=x+radius*Math.cos(angle);const py=y+radius*Math.sin(angle);if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py)}ctx.closePath();ctx.fill()}
 
-async function crash(){active=false;stopMusic();sound.crash();haptics.crash();spawnFX(player.x+player.size/2,player.y+player.size/2,'#ef4444',40,1.5);shakeIntensity=15;await addCoins(sessionCoins);const rank=await saveToLeaderboard(score,window.currentDiff);lastRank=rank;ui.final.innerText=score;ui.sessionCoins.innerText=sessionCoins;ui.hud.style.display='none';ui.controls.style.display='none';ui.crash.style.display='flex';ui.powerupDisplay.style.display='none';document.getElementById('powerupCanvas').style.display='none';const isNewRecord=await saveHS(window.currentDiff,score);if(isNewRecord)ui.newRecord.style.display='block';ui.rankMsg.style.display='block';ui.rankMsg.innerText='📊 Rang #'+rank;if(rank<=10)ui.rankMsg.innerText+=' 🎉 TOP 10!';}
+function showGameOverEffects(){
+  let flashEl=document.getElementById('game-flash');
+  let overlayEl=document.getElementById('game-over-overlay');
+  if(!flashEl){flashEl=document.createElement('div');flashEl.id='game-flash';document.body.appendChild(flashEl);}
+  if(!overlayEl){overlayEl=document.createElement('div');overlayEl.id='game-over-overlay';overlayEl.innerText='GAME OVER';document.body.appendChild(overlayEl);}
+  overlayEl.innerText='GAME OVER';
+  overlayEl.classList.add('active');
+  flashEl.classList.add('active');
+  shakeIntensity=25;
+  setTimeout(()=>spawnFX(player.x+player.size/2,player.y+player.size/2,'#ef4444',20,1.5),0);
+  setTimeout(()=>spawnFX(player.x+player.size/2,player.y+player.size/2,'#fbbf24',20,1.5),100);
+  setTimeout(()=>spawnFX(player.x+player.size/2,player.y+player.size/2,'#fff',20,1.5),200);
+  playTone(400,100,0.5,'sawtooth',0.3);
+  setTimeout(()=>playTone(300,80,0.4,'square',0.25),200);
+  setTimeout(()=>{overlayEl.classList.remove('active');flashEl.classList.remove('active');},1200);
+}
+
+async function crash(){active=false;stopMusic();sound.crash();haptics.crash();spawnFX(player.x+player.size/2,player.y+player.size/2,'#ef4444',40,1.5);shakeIntensity=15;showGameOverEffects();await addCoins(sessionCoins);await saveToLeaderboard(score,window.currentDiff);await syncPendingScores();const allEntries=await getLeaderboardEntries();const pendingEntries=await getPendingScores();const onlineEntries=await fetchOnlineLeaderboard(window.currentDiff);let merged=[...onlineEntries||[],...allEntries,...pendingEntries];merged=merged.filter(e=>e.difficulty===window.currentDiff);const seen=new Map();merged.forEach(e=>{const key=e.playerId||e.nickname;const prev=seen.get(key);if(!prev||e.score>prev.score)seen.set(key,e);});const uniqueList=Array.from(seen.values()).sort((a,b)=>b.score-a.score);const myPlayerId=await ensurePlayerId();const myNick=cache.nickname||'Spieler';const actualRank=(uniqueList.findIndex(e=>(e.playerId===myPlayerId||e.nickname===myNick)&&e.difficulty===window.currentDiff))+1;lastRank=actualRank;ui.final.innerText=score;ui.sessionCoins.innerText=sessionCoins;ui.hud.style.display='none';ui.controls.style.display='none';ui.crash.style.display='flex';ui.powerupDisplay.style.display='none';document.getElementById('powerupCanvas').style.display='none';const isNewRecord=await saveHS(window.currentDiff,score);if(isNewRecord)ui.newRecord.style.display='block';ui.rankMsg.style.display='block';ui.rankMsg.innerText='📊 Rang #'+actualRank;if(actualRank<=10)ui.rankMsg.innerText+=' 🎉 TOP 10!';}
 
 function draw(){ctx.save();if(shakeIntensity>0.5){shakeX=(Math.random()-0.5)*shakeIntensity;shakeY=(Math.random()-0.5)*shakeIntensity;ctx.translate(shakeX,shakeY);shakeIntensity*=0.9}else{shakeIntensity=0;shakeX=0;shakeY=0}ctx.clearRect(-10,-10,cw+20,ch+20);drawStars();ctx.strokeStyle='#1e293b';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,player.ground+player.size);ctx.lineTo(cw,player.ground+player.size);ctx.stroke();fx.forEach(p=>{ctx.globalAlpha=Math.max(0,p.l);ctx.fillStyle=p.col;if(p.isText){ctx.font='900 24px Orbitron';ctx.fillText(p.text,p.x,p.y)}else{ctx.fillRect(p.x,p.y,4,4)}});ctx.globalAlpha=1
 
